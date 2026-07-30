@@ -3,6 +3,52 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 — create_stations (all 41 functions now implemented)
+
+### Done
+
+- `src/ccamlrgis/stations.py` (`create_stations`) -- the last function in
+  §5's inventory. Same raster-cell-boundary (blocky) polygonisation
+  approach as `get_iso_polys`/`seabed_area` for building depth-stratum
+  polygons from the bathymetry raster, then random or minimum-spaced
+  (`dist=`) point sampling within each stratum, matching R's algorithm in
+  `create.R`.
+- **User explicitly asked to cut validation cost** below the design doc's
+  original 1,000-seed KS-test distributional plan. Landed on: one R
+  reference run (`Nauto=20`) to sanity-check area-proportional station
+  counts, plus ~15 Python-only seeds checking hard invariants (in-polygon,
+  correct stratum, correct count, `dist` spacing respected) -- no
+  distribution-matching, no repeated R runs. Logged as porting_notes.md
+  deviation 18, with the original plan documented there too as a fallback
+  if distributional parity matters later.
+- Found and fixed a real bug during testing: extracting a single grid-point
+  row as a pandas Series (in the `dist=` iterative-thinning loop) silently
+  upcast the integer `stratum` column to float, since a Series has one
+  dtype and the row also held float x/y columns. Fixed by re-casting after
+  reassembly.
+- **87/87 tests pass** (78 offline + 9 network).
+
+### Next
+
+All 41 functions from §5's inventory are now implemented. What's left is
+release-readiness infrastructure, none of it blocking further function
+work:
+
+1. GitHub Actions CI.
+2. `datasets.py` + §4 data-publishing pipeline (unblocks `clip_to_coast`'s
+   default `coast=`, `small_bathy()`, bundled example datasets, and
+   `add_labels(mode='auto')`'s real data source).
+3. `docs/geospatial_rules.md` and
+   `ccamlrgis.validate.check_geospatial_rules` (§2) -- not started.
+4. The four notebooks (§3), a full runnable-tutorial `README.md` (currently
+   just a stub), `NOTICE` file, `mypy --strict`/`ruff` passes -- the rest
+   of the G5 release gate.
+5. The Building-Polygons end-to-end notebook test against
+   `geospatial_operations-main`'s `Completed_Polygons.gpkg` (§6, described
+   as "the strongest evidence the port is faithful to CCAMLR practice") --
+   not yet run as an actual test, though the fixtures for it
+   (`tests/fixtures/building_polygons/`) have been in place since G0.
+
 ## 2026-07-29 (7) — Phase 5: the ccamlrgis.plot submodule
 
 ### Done

@@ -6,13 +6,13 @@ reason, and the impact on users. Nothing in this list is accidental — where
 the R package rounds, sorts, or uses a particular statistic, the port matches
 it unless a deviation is logged below (§7.6 of the port design).
 
-Status: Phases 1-5 implemented (all "create"/"load"/analysis/plotting
-functions except `create_stations`, deliberately deferred -- see
-PROGRESS.md). Deviations 1-6 below were known up front from the design
-decisions in §1-§2 of the port design and logged pre-emptively per §7.4;
-deviations 7-13 were found during implementation; 14-17 are the plotting
-layer's simplifications, explicitly permitted by the design doc's own
-"cosmetic output need not be pixel-identical" bar.
+Status: all 41 functions in §5's inventory are implemented (Phases 1-5,
+plus `create_stations`). Deviations 1-6 below were known up front from the
+design decisions in §1-§2 of the port design and logged pre-emptively per
+§7.4; deviations 7-13 were found during implementation; 14-17 are the
+plotting layer's simplifications, explicitly permitted by the design doc's
+own "cosmetic output need not be pixel-identical" bar; 18 is
+`create_stations`'s reduced-cost validation approach (user-requested).
 
 ## 1. Plotting: stateful base graphics → explicit Axes
 
@@ -417,3 +417,45 @@ sane output, but a visual regression has not been established. A
 `pytest-mpl` baseline suite (using this port's own first "known-good"
 renders as the baseline, not R's) would be a reasonable follow-up to catch
 future regressions, even without R-comparison.
+
+## 18. `create_stations`: invariant + area-proportionality checks, not distribution-matching
+
+**Design doc's original plan:** validate `create_stations` distributionally
+-- 1,000 seeds, comparing the resulting station-count/placement
+distribution against R's own distribution over many runs via a two-sample
+KS test (p > 0.01).
+
+**What was actually done, at the user's explicit request to reduce this
+validation's cost:** one deterministic-input R reference run (`Nauto=20`,
+`set.seed(42)`, same pattern as every other fixture in this port) checks
+that Python's area-proportional station counts
+(`round(area/max(area)*n_auto)`) land close to R's own resulting counts
+for the same inputs. Separately, ~15 Python-only seeds check hard
+invariants that must hold regardless of randomness: every station falls
+inside the input polygon, every station's stratum label is one of the
+requested depth ranges, requested counts are met exactly, and (for
+`dist=`) every pair of stations is at least `dist` apart.
+
+**Reason:** station *placement* is randomly sampled in both languages
+using RNGs that don't produce comparable sequences across languages
+(R's `sample()` vs. `numpy`'s `Generator`), so a true placement-level
+match was never achievable -- only a distributional one, which requires
+many runs of *both* implementations to be meaningful. That's a
+substantially larger validation cost (per the original plan: ~1,000 R
+runs, each needing its own isobath-polygon computation from the
+bathymetry raster) for a function whose correctness is actually dominated
+by structural properties (right polygon, right depth range, right count,
+right spacing) that the invariant checks catch directly and cheaply, plus
+one area-proportionality check that catches the main way `Nauto` counts
+could silently go wrong (a bad stratum-polygon or area computation).
+
+**Impact on users:** there is high confidence `create_stations` produces
+structurally correct output (every station is genuinely inside its
+polygon and depth stratum, spacing/count constraints are always met) and
+that `n_auto`'s area-proportional counts are close to what R would
+produce for the same inputs. There is lower confidence that the *spatial
+distribution* of station placements (e.g., subtle clustering patterns)
+statistically matches R's -- though R's own placement isn't reproducible
+run-to-run either, so this was never a precise-match target. If exact
+distributional parity becomes important later, the original 1,000-seed
+KS-test design is documented above as the fallback.

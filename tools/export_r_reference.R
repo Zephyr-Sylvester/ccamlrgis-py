@@ -446,6 +446,35 @@ cat(sprintf(
 ))
 
 # ---------------------------------------------------------------------------
+# 9. create_stations -- ONE deterministic-input reference run (station
+#    picking is random in R too; not fixture-matched vertex-for-vertex).
+#    Nauto=20 lets Python's independently-computed per-stratum areas be
+#    sanity-checked against R's own resulting station counts, which are a
+#    direct function of area (round(area/max(area)*Nauto)) and so should
+#    match closely regardless of which specific points either language's
+#    RNG happened to pick.
+# ---------------------------------------------------------------------------
+dir.create("tests/fixtures/create_stations", showWarnings = FALSE, recursive = TRUE)
+
+station_poly <- create_Polys(
+  data.frame(Name = "mypol", Latitude = c(-75, -75, -70, -70), Longitude = c(-170, -180, -180, -170)),
+  Densify = TRUE
+)
+station_bathy <- terra::crop(SmallBathy(), terra::ext(station_poly))
+set.seed(42)
+station_out <- create_Stations(station_poly, station_bathy, Depths = c(-2000, -1500, -1000, -550), Nauto = 20)
+
+station_counts <- as.data.frame(table(station_out$Stratum))
+colnames(station_counts) <- c("Stratum", "Count")
+write.csv(station_counts, "tests/fixtures/create_stations/nauto_counts.csv", row.names = FALSE)
+record("tests/fixtures/create_stations/nauto_counts.csv")
+
+st_write(station_poly, "tests/fixtures/create_stations/input_poly.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_stations/input_poly.gpkg")
+
+cat(sprintf("create_stations: %d stations across %d strata\n", nrow(station_out), nrow(station_counts)))
+
+# ---------------------------------------------------------------------------
 # manifest
 # ---------------------------------------------------------------------------
 jsonlite::write_json(

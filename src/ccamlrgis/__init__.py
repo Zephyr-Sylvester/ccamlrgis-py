@@ -25,6 +25,7 @@ from .load import (
 )
 from .pies import create_pies
 from .shapes import create_arrow, create_circular_arrow, create_ellipse, create_hashes
+from .stations import create_stations
 
 __version__ = "0.1.0.dev0"
 
@@ -50,6 +51,7 @@ __all__ = [
     "create_circular_arrow",
     "create_ellipse",
     "create_hashes",
+    "create_stations",
     "load_asds",
     "load_ssrus",
     "load_coastline",
