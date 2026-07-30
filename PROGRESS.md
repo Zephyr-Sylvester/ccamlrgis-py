@@ -34,27 +34,23 @@ Newest entries at the top.
   now defaults to `datasets.load_example("Coast")`, matching R, now that
   the pipeline making that download possible exists. Also wired
   `add_labels(mode='auto')`'s `labels_data=` to the same default.
+- **Published the `data-v1` GitHub Release** (with the user's explicit
+  go-ahead, since creating a real release is a "visible to others"
+  action): all 9 artifacts + `manifest.json` uploaded via the GitHub REST
+  API (no `gh` CLI available in this environment). Verified against the
+  *live* release, not a local stand-in: a fresh temp cache dir with no
+  pre-population successfully fetched `PolyData`, `Coast` (with correct
+  CRS), and `SmallBathy` over real network. Full network test suite
+  re-run against the live release afterwards.
 - **99/99 tests pass** (79 offline + 20 network).
-
-### Explicitly not done yet (needs your go-ahead)
-
-The actual GitHub Release (`data-v1`) has not been created, and
-`data_artifacts/` (git-ignored, built locally) has not been uploaded
-anywhere. That's a "visible to others" action on your real repo, so it
-needs an explicit decision from you, not an assumption from me. Until a
-release exists, `load_example`/`small_bathy`/`clip_to_coast`'s default/
-`add_labels`'s default will all fail with `CCAMLRGISOfflineError` for any
-user who hasn't pre-populated their own cache -- worth doing before this
-is genuinely usable by anyone else.
 
 ### Next
 
-1. **Decide on publishing the `data-v1` release** (see above).
-2. GitHub Actions CI.
-3. `ccamlrgis.validate.check_geospatial_rules` (§2) -- not started.
-4. The four notebooks, a full runnable-tutorial `README.md`, `NOTICE`
+1. GitHub Actions CI.
+2. `ccamlrgis.validate.check_geospatial_rules` (§2) -- not started.
+3. The four notebooks, a full runnable-tutorial `README.md`, `NOTICE`
    file, `mypy`/`ruff` passes -- the rest of the G5 release gate.
-5. The Building-Polygons end-to-end notebook test (§6) -- fixtures have
+4. The Building-Polygons end-to-end notebook test (§6) -- fixtures have
    existed since G0, test itself not yet written.
 
 ## 2026-07-30 — create_stations (all 41 functions now implemented)
