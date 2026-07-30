@@ -3,6 +3,37 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (7) — Building-Polygons end-to-end test
+
+`tests/test_building_polygons.py`: builds the three §6 tutorial polygons
+from `My_Polygons_Form.csv`, clips them to the *live* `load_coastline()`
+(replicating the tutorial's manual `st_difference` against only the
+"Land"-surface features, not `clip_to_coast()` -- matches
+`Completed_Polygons.gpkg`'s column structure, which has no
+`Clipped_AreaKm2` column), and compares against the Secretariat's own
+committed `Completed_Polygons.gpkg`. Also runs `check_geospatial_rules` on
+the result and asserts it's clean.
+
+Result: essentially exact (AreaKm2 matches R's own rounding, Labx/Laby to
+~10 significant figures, symmetric-difference area ~1e-12 km² --
+floating-point noise, not real drift). CCAMLR's live coastline apparently
+hasn't changed since the reference file was generated. Tightened the
+test's tolerances to match that real fidelity rather than leaving them
+defensively loose for a live external service. **116/116 tests pass** (95
+offline + 21 network).
+
+Per design doc §6, this is "the strongest evidence the port is faithful
+to CCAMLR practice" -- it exercises densification, projection, real
+coastline clipping, and area/centroid computation together against a
+real, independently-produced CCAMLR output file.
+
+### Next
+
+1. The four notebooks + `nbval` in CI (up next: recreate the R package's
+   example figures using the Python port, at the user's request).
+2. `README.md` full tutorial.
+3. `mypy --strict` compliance (last, one consolidated pass).
+
 ## 2026-07-30 (6) — cite.py (§2's other half, now complete)
 
 ### Done
