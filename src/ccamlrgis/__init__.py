@@ -1,4 +1,6 @@
-from .analysis import clip_to_coast, project_data
+from .analysis import assign_areas, clip_to_coast, project_data
+from .colours import add_colour
+from .create import create_lines, create_points, create_polygrids, create_polys
 from .crs import CCAMLR_CRS, WGS84
 from .densify import densify_data
 from .load import (
@@ -21,6 +23,12 @@ __all__ = [
     "project_data",
     "densify_data",
     "clip_to_coast",
+    "assign_areas",
+    "add_colour",
+    "create_polys",
+    "create_lines",
+    "create_points",
+    "create_polygrids",
     "load_asds",
     "load_ssrus",
     "load_coastline",

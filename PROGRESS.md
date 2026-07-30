@@ -3,6 +3,61 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-29 (4) — Phase 2: create_polys/_lines/_points/_polygrids, add_colour, assign_areas
+
+### Done
+
+All of Phase 2 (§5's "Create functions" table) is implemented in
+`src/ccamlrgis/create.py` (`create_polys`, `create_lines`, `create_points`,
+`create_polygrids` -- both degree and equal-area modes, plus the private
+`_build_polys`/`_build_lines`/`_build_points`/`_add_buffer` builders),
+`src/ccamlrgis/colours.py` (`add_colour`), and `assign_areas` (added to
+`analysis.py`). Extended `tools/export_r_reference.R` with G2 fixtures
+(reusing the existing `clip_to_coast/input.gpkg` fixture for the buffered
+`create_polys` case rather than duplicating it) and added the R example
+datasets (`PolyData`/`LineData`/`PointData`/`GridData`) as CSVs so the
+Python side can call the same input R used. **33/33 tests pass** (24
+offline + 9 network).
+
+Real bugs found and fixed while validating against fixtures (not
+R-behaviour deviations -- these are correctness fixes, logged here rather
+than in porting_notes.md):
+- `_add_buffer` used shapely's default buffer resolution (16 segments/circle)
+  vs sf's default `nQuadSegs=30` (120/circle) -- visible geometry mismatch
+  on any positive buffer. Fixed by passing `resolution=30`.
+- Line length used a WGS84 ellipsoidal geodesic (pyproj default), but R's
+  `st_length()` on geographic coordinates uses **s2** (spherical, IUGG mean
+  radius 6371.01 km) by default -- a systematic ~0.3-0.6% length error.
+  Fixed by using a sphere of that radius instead of the WGS84 ellipsoid.
+- `_seq_inclusive` (the "densify a cell edge to 0.1 degree steps" helper)
+  could overshoot the upper bound, unlike R's `seq()` -- silently producing
+  a longitude > 180 near the antimeridian and corrupting a cell polygon.
+  Fixed to match R's exact stop-at-or-before-`to` semantics.
+- `create_polygrids`'s point-to-cell merge conflated the spatial index's
+  *positional* match (0-based) with the cell's `ID` *value* (1-based),
+  silently dropping exactly one populated cell from every non-blank grid.
+  Fixed by mapping through `group["ID"]` instead of assuming
+  `position == ID - 1`.
+
+Two new deviations logged (`porting_notes.md` 9-10): `assign_areas` takes
+`polys` as a dict of GeoDataFrames instead of R's `Polys=c('name',...)` +
+`get()`-from-caller's-global-scope (no safe Python equivalent); the
+boundary-point nudge in grid point-matching is deterministic instead of
+R's random coin-flip (not a meaningful faithfulness target either way).
+
+`add_colour`'s hex output can differ from R's by ±1 in a single RGB channel
+at rounding boundaries -- explicitly allowed by the design doc's own
+faithfulness bar ("cosmetic plotting output need not be pixel-identical").
+
+### Next
+
+1. GitHub Actions CI.
+2. `datasets.py` + §4 data-publishing pipeline (unblocks `clip_to_coast`'s
+   default `coast=`, `small_bathy()`, bundled example datasets).
+3. Phase 3: `get_depths`, `seabed_area`, `get_c_intersection`, `rotate_obj`,
+   `get_iso_polys`, `create_stations` (validated distributionally, not by
+   equality -- it's stochastic).
+
 ## 2026-07-29 (3) — cache.py, load.py, clip_to_coast
 
 ### Done

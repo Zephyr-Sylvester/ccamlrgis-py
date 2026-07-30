@@ -190,3 +190,50 @@ accurate than R's default low-res `Coast` anyway (R's own docs recommend
 `load_Coastline()` for accuracy, Clip2Coast.R's own docstring says so). Once
 §4's data pipeline exists, a cache-backed low-res default can be restored to
 match R's default behaviour exactly; this note should be revisited then.
+
+## 9. `assign_areas`: `polys` is a dict of GeoDataFrames, not a name lookup
+
+**R behaviour:** `assign_areas(Input, Polys=c('ASDs','SSRUs'), ...)` takes a
+character vector naming objects that must already exist in the *caller's*
+global environment, and looks each one up internally with `get(Polys[i])`.
+
+**Python behaviour:** `assign_areas(input, polys, ...)` takes `polys` as a
+dict mapping the same names directly to GeoDataFrames, e.g.
+`polys={"ASDs": load_asds(), "SSRUs": load_ssrus()}`. `names_out` defaults
+to `list(polys)` (R: `NamesOut` defaults to `Polys`).
+
+**Reason:** `get()`-from-caller's-global-scope has no safe or idiomatic
+Python equivalent -- Python has no notion of "the calling frame's global
+environment" that a library function should reach into, and doing so via
+`inspect`/frame hacks would be exactly the kind of implicit magic this port
+avoids elsewhere (e.g. deviation 6, not reproducing R's own scoping/matching
+magic). Passing the objects directly is the idiomatic Python shape and is
+no more verbose than R's version.
+
+**Impact on users:** `assign_areas(data, Polys=c('ASDs','SSRUs'))` becomes
+`assign_areas(data, polys={'ASDs': asds, 'SSRUs': ssrus})` -- the caller
+passes the actual loaded layers instead of their variable names.
+
+## 10. `create_polygrids`: deterministic nudge for points on a cell boundary
+
+**R behaviour:** `cGrid.r`'s point-to-cell matching loop nudges any point
+that fails to intersect a cell (i.e. sits exactly on a boundary) by a
+*randomly* signed `0.0001`-degree offset (`sample(c(-x, x), ...)`) and
+retries, growing the offset each pass.
+
+**Python behaviour:** `_match_points_to_cells` nudges by the same growing
+magnitude but always in the positive direction, deterministically.
+
+**Reason:** a boundary point only needs *some* small nudge to land
+unambiguously in a neighbouring cell -- which neighbour is arbitrary either
+way. R's version is not reproducible even between two runs of R itself;
+matching its output vertex-for-vertex on this specific point would mean
+matching a coin flip, which isn't a meaningful faithfulness target. A fixed
+direction is strictly better (reproducible) and behaviourally equivalent.
+
+**Impact on users:** for the rare case of a data point falling exactly on a
+grid cell boundary, which specific neighbouring cell it's nudged into may
+differ from what a given R run produced (and would differ between two R
+runs too). The point is still assigned to exactly one adjacent cell, and
+which one is only ever a floating-point coin flip on the true value's exact
+placement.

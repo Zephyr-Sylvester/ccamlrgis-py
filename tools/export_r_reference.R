@@ -252,6 +252,88 @@ record("tests/fixtures/building_polygons/My_Polygons_Form.csv")
 record("tests/fixtures/building_polygons/Completed_Polygons.gpkg")
 
 # ---------------------------------------------------------------------------
+# 6. Phase 2 (G2): create_Polys/_Lines/_Points/_PolyGrids, add_col, assign_areas
+# ---------------------------------------------------------------------------
+dir.create("tests/fixtures/create_polys", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_lines", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_points", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_polygrids", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/add_col", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/assign_areas", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/example_data", showWarnings = FALSE, recursive = TRUE)
+
+# Input datasets, as CSV, so the Python side can call its own port on the
+# exact same input R used to produce the fixtures below.
+write.csv(PolyData, "tests/fixtures/example_data/PolyData.csv", row.names = FALSE)
+write.csv(LineData, "tests/fixtures/example_data/LineData.csv", row.names = FALSE)
+write.csv(PointData, "tests/fixtures/example_data/PointData.csv", row.names = FALSE)
+write.csv(GridData, "tests/fixtures/example_data/GridData.csv", row.names = FALSE)
+record("tests/fixtures/example_data/PolyData.csv")
+record("tests/fixtures/example_data/LineData.csv")
+record("tests/fixtures/example_data/PointData.csv")
+record("tests/fixtures/example_data/GridData.csv")
+
+# create_Polys: default (Densify=TRUE, no buffer) on the bundled example,
+# and on the Building-Polygons form (no buffer/clip -- clip_to_coast is
+# already tested separately). The buffered case is already covered by the
+# clip_to_coast/input.gpkg fixture (create_Polys(PolyData, Buffer=...)) --
+# not duplicated here.
+polys_default <- create_Polys(PolyData)
+st_write(polys_default, "tests/fixtures/create_polys/polydata_default.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_polys/polydata_default.gpkg")
+
+bp <- read.csv(bp_path)
+polys_bp <- create_Polys(bp)
+st_write(polys_bp, "tests/fixtures/create_polys/building_polygons.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_polys/building_polygons.gpkg")
+
+# create_Lines: Densify=TRUE per the R docs' own example
+lines_default <- create_Lines(LineData, Densify = TRUE)
+st_write(lines_default, "tests/fixtures/create_lines/linedata_densify.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_lines/linedata_densify.gpkg")
+
+# create_Points
+points_default <- create_Points(PointData)
+st_write(points_default, "tests/fixtures/create_points/pointdata.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_points/pointdata.gpkg")
+
+# create_PolyGrids: degree mode (R docs' own example) and equal-area mode
+grid_degree <- create_PolyGrids(GridData, dlon = 2, dlat = 1)
+st_write(grid_degree, "tests/fixtures/create_polygrids/griddata_degree.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_polygrids/griddata_degree.gpkg")
+
+grid_equalarea <- create_PolyGrids(GridData, Area = 5000)
+st_write(grid_equalarea, "tests/fixtures/create_polygrids/griddata_equalarea.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_polygrids/griddata_equalarea.gpkg")
+
+# add_col
+mycols <- add_col(var = PointData$Nfishes)
+write.csv(data.frame(varcol = mycols$varcol), "tests/fixtures/add_col/pointdata_nfishes_varcol.csv", row.names = FALSE)
+write.csv(data.frame(cuts = mycols$cuts), "tests/fixtures/add_col/pointdata_nfishes_cuts.csv", row.names = FALSE)
+write.csv(data.frame(cols = mycols$cols), "tests/fixtures/add_col/pointdata_nfishes_cols.csv", row.names = FALSE)
+record("tests/fixtures/add_col/pointdata_nfishes_varcol.csv")
+record("tests/fixtures/add_col/pointdata_nfishes_cuts.csv")
+record("tests/fixtures/add_col/pointdata_nfishes_cols.csv")
+
+# assign_areas: a fixed (not random -- R's RNG isn't reproducible in Python)
+# set of points against the live ASDs/SSRUs layers
+ASDs <- load_ASDs()
+SSRUs <- load_SSRUs()
+assign_input <- data.frame(
+  Lat = c(-60.5, -62.2, -65.0, -67.8, -70.1, -55.3, -63.7, -58.9, -61.4, -69.2),
+  Lon = c(-55.2, -45.8, -31.0, 175.3, 80.5, 10.2, -170.4, 140.7, -0.3, 100.9)
+)
+assigned <- assign_areas(Input = assign_input, Polys = c("ASDs", "SSRUs"), NamesOut = c("ASD", "SSRU"))
+write.csv(assigned, "tests/fixtures/assign_areas/fixed_points.csv", row.names = FALSE)
+record("tests/fixtures/assign_areas/fixed_points.csv")
+
+cat(sprintf(
+  "Phase 2: create_polys(%d,%d rows), create_lines(%d), create_points(%d), grids(%d,%d), assign_areas(%d)\n",
+  nrow(polys_default), nrow(polys_bp), nrow(lines_default), nrow(points_default),
+  nrow(grid_degree), nrow(grid_equalarea), nrow(assigned)
+))
+
+# ---------------------------------------------------------------------------
 # manifest
 # ---------------------------------------------------------------------------
 jsonlite::write_json(

@@ -81,7 +81,7 @@ False` keyword (§1.3 caching contract) with no R equivalent.
 |---|---|---|
 | `project_data(Input, NamesIn=NULL, NamesOut=NULL, append=TRUE, inv=FALSE)` | `project_data(input, names_in=None, names_out=None, append=True, inverse=False)` | `inv=` → `inverse=`; NA-fill/restore behaviour and "not on Earth" warnings preserved verbatim as `warnings.warn` |
 | `Clip2Coast(Input)` | `clip_to_coast(input, coast)` | `coast` is required for now (temporary, see `porting_notes.md` deviation 8) — pass e.g. `load_coastline()`; a cache-backed default matching R's bundled low-res `Coast` will land once the §4 data pipeline exists |
-| `assign_areas(Input, Polys, AreaNameFormat='GAR_Long_Label', Buffer=0, NamesIn=NULL, NamesOut=NULL)` | `assign_areas(input, polys, area_name_format='GAR_Long_Label', buffer=0, names_in=None, names_out=None)` | |
+| `assign_areas(Input, Polys, AreaNameFormat='GAR_Long_Label', Buffer=0, NamesIn=NULL, NamesOut=NULL)` | `assign_areas(input, polys, area_name_format='GAR_Long_Label', buffer=0, names_in=None, names_out=None)` | `Polys=c('ASDs','SSRUs')` (names of pre-loaded objects, looked up via R's `get()`) → `polys={'ASDs': asds, 'SSRUs': ssrus}` (a dict of the actual GeoDataFrames) — no safe Python equivalent to R's global-scope lookup; see porting_notes.md deviation 9 |
 | `get_depths(Input, Bathy, NamesIn=NULL)` | `get_depths(input, bathy, names_in=None)` | |
 | `seabed_area(Bathy, Poly, PolyNames=NULL, depth_classes=c(-600,-1800))` | `seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800))` | |
 | `get_C_intersection(Line1, Line2, Plot=TRUE)` | `get_c_intersection(line1, line2)` | `Plot=` dropped — Python never draws as a side effect (§1.2); use the separate plot helper |
