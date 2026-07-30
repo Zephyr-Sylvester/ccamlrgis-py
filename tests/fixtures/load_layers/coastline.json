@@ -1,0 +1,13 @@
+{
+  "layer": "coastline_v1_6932",
+  "n_features": 5,
+  "columns": ["id", "gid", "version", "source", "srcvrsn", "layer", "surface"],
+  "geometry_type": "MULTIPOLYGON",
+  "crs_epsg": 6932,
+  "bbox": {
+    "xmin": -5180778.6233,
+    "ymin": -5389930.0463,
+    "xmax": 4215277.267,
+    "ymax": 5286396.6212
+  }
+}

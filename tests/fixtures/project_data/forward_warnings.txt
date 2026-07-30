@@ -1,0 +1,4 @@
+One record is missing location and will not be projected
+
+2 records are not on Earth and will not be projected
+

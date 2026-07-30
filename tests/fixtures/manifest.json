@@ -1,0 +1,136 @@
+{
+  "generated_with": {
+    "r_version": "R version 4.5.3 (2026-03-11)",
+    "ccamlrgis_version": "4.3.1"
+  },
+  "files": {
+    "tests/fixtures/project_data/forward.csv": {
+      "sha256": "00b24a93f808ab720d0f39c5b616c1816cc3b5d1cacfe47f86ad12d2187a9873",
+      "bytes": 1626
+    },
+    "tests/fixtures/project_data/inverse_roundtrip.csv": {
+      "sha256": "0bda80aedc702171c53d28c969040651ff3aec0f001095cd5d1075d68e7c9869",
+      "bytes": 1867
+    },
+    "tests/fixtures/project_data/forward_warnings.txt": {
+      "sha256": "c93304a31f01962de621f6b0f9ab365b4341f0c0a2b18fcbf4d2c646ab00665b",
+      "bytes": 112
+    },
+    "tests/fixtures/densify_data/simple_box_input.csv": {
+      "sha256": "708d508ebad46ecb3efd2c2c19f2087b4f357f70eb54673261d227b80b95ad37",
+      "bytes": 48
+    },
+    "tests/fixtures/densify_data/simple_box_output.csv": {
+      "sha256": "625abd45cc43ecfc2fc3e88607478ea97babe0295ad857f7540aa8dd71a6b26a",
+      "bytes": 4040
+    },
+    "tests/fixtures/densify_data/antimeridian_ccw_input.csv": {
+      "sha256": "0d7a748b9f3ac083d21aee315458b74ce3c702be30cddadc5db4e5a67103f4a4",
+      "bytes": 29
+    },
+    "tests/fixtures/densify_data/antimeridian_ccw_output.csv": {
+      "sha256": "d189fa7cb69abb9d6b5379b63102d41314eaf0893d7dc1f72d310e6b471853e6",
+      "bytes": 2783
+    },
+    "tests/fixtures/densify_data/antimeridian_cw_input.csv": {
+      "sha256": "e3b0444e5ed2948e0f69be50e2b48f186740dda11d2ff1207cc9fe1e64d121ff",
+      "bytes": 29
+    },
+    "tests/fixtures/densify_data/antimeridian_cw_output.csv": {
+      "sha256": "19461f556bfe98972a16330539e933f2df5a104c73266cc725391068909b6964",
+      "bytes": 2783
+    },
+    "tests/fixtures/densify_data/exactly_180_wide_input.csv": {
+      "sha256": "744206827d1e953128f6fbec5971272c52e17190d491768ea123e37c24de14de",
+      "bytes": 27
+    },
+    "tests/fixtures/densify_data/exactly_180_wide_output.csv": {
+      "sha256": "29490a504726d26031082292c48939ec2745490883a51ff144f798995d798286",
+      "bytes": 17721
+    },
+    "tests/fixtures/densify_data/iso_longitude_input.csv": {
+      "sha256": "7687178a85a9f46d5b4aae2c04247fa5f05e4ec1799f245ffd269e1e241fc4f9",
+      "bytes": 30
+    },
+    "tests/fixtures/densify_data/iso_longitude_output.csv": {
+      "sha256": "7687178a85a9f46d5b4aae2c04247fa5f05e4ec1799f245ffd269e1e241fc4f9",
+      "bytes": 30
+    },
+    "tests/fixtures/densify_data/building_polygons_P1_input.csv": {
+      "sha256": "73eb108fe8b988473a55d4797f7f6199ea3a57ba28d3cb6ab22ae6d5b7c1b6a6",
+      "bytes": 63
+    },
+    "tests/fixtures/densify_data/building_polygons_P1_output.csv": {
+      "sha256": "456d26dda29b4c2feff27303f4b9a2124faa7dbcacacbe424848ea4fc89544e7",
+      "bytes": 2505
+    },
+    "tests/fixtures/densify_data/building_polygons_P2_input.csv": {
+      "sha256": "a626d515c4913ff897f665819817323a1cb9134f1fbeba569ff69599378e87d6",
+      "bytes": 42
+    },
+    "tests/fixtures/densify_data/building_polygons_P2_output.csv": {
+      "sha256": "2fc0d9b4e179d61fad5de68fb5230468feb1ef19ae27206aa4c69988c9bc5742",
+      "bytes": 966
+    },
+    "tests/fixtures/densify_data/building_polygons_P3_input.csv": {
+      "sha256": "4c27f927aff35bab2a9cf3be2ca33d2c159f100d5af8cb45ae85b5a24cbe7c7a",
+      "bytes": 59
+    },
+    "tests/fixtures/densify_data/building_polygons_P3_output.csv": {
+      "sha256": "2a705ae5255fb6e79b4a46bdd581e2d97e43f3aef4389a80ba95263ed060aad8",
+      "bytes": 2399
+    },
+    "tests/fixtures/densify_data/summary.json": {
+      "sha256": "9f0066a5fd13a61567fd3619c7b6da4ecba11e95d73faaa0286f55938eb7cdcf",
+      "bytes": 747
+    },
+    "tests/fixtures/clip_to_coast/input.gpkg": {
+      "sha256": "3cb64afbb61b1ec472b10d3d24037ca3fa4064735013d593720ea2844d40cf45",
+      "bytes": 122880
+    },
+    "tests/fixtures/clip_to_coast/output.gpkg": {
+      "sha256": "542e51a731f18fb826f5221b89f15b8e8dbea3b7763b3d7c6d6ee0d62013d726",
+      "bytes": 131072
+    },
+    "tests/fixtures/load_layers/asds.json": {
+      "sha256": "2cac9da411860a9982805132ad67c035e30992ab4092f9b71376c14852a34b82",
+      "bytes": 498
+    },
+    "tests/fixtures/load_layers/ssrus.json": {
+      "sha256": "82069bf82de5a27f1aafc4c3e3f02839cd2a99d1fe8dcd1630cc44507caf99bc",
+      "bytes": 451
+    },
+    "tests/fixtures/load_layers/coastline.json": {
+      "sha256": "b20666498680a31408c0af9dd898dd1693e5d5d9ef5d30ecc848fd122328fae0",
+      "bytes": 310
+    },
+    "tests/fixtures/load_layers/rbs.json": {
+      "sha256": "b70e9551b4bb501b3ec554e1230cf8b66bd289f1ea01f650177c9ecbf8869740",
+      "bytes": 477
+    },
+    "tests/fixtures/load_layers/ssmus.json": {
+      "sha256": "d39d8484731fe7bdb6ce29bb4e30ac3f8a72ed0c3f03820264b1f59370dd6270",
+      "bytes": 449
+    },
+    "tests/fixtures/load_layers/mas.json": {
+      "sha256": "bdd293a8677af6212a0a5f8a7aefebfbdf101047879409d1363242ecdd72abd5",
+      "bytes": 465
+    },
+    "tests/fixtures/load_layers/mpas.json": {
+      "sha256": "a40c69b715f2c969ee6679b20ac242cadb6057815e8741a567fed692694dfc1d",
+      "bytes": 434
+    },
+    "tests/fixtures/load_layers/eezs.json": {
+      "sha256": "c68b0b22ded5ca5480ca8bd003efd7ce6d00557a920c59a6ffc39da1e436b602",
+      "bytes": 445
+    },
+    "tests/fixtures/building_polygons/My_Polygons_Form.csv": {
+      "sha256": "ff394d266efc027e4c7074a3fc3db4824b8b6bef32ed35ddbea1b2fe80f5e3fa",
+      "bytes": 162
+    },
+    "tests/fixtures/building_polygons/Completed_Polygons.gpkg": {
+      "sha256": "bdbd7952196057d135c0e203d1567cd23e23c3cb1b0988b364f12f3234b9490c",
+      "bytes": 180224
+    }
+  }
+}

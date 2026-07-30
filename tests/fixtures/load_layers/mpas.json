@@ -1,0 +1,13 @@
+{
+  "layer": "mpas_6932",
+  "n_features": 6,
+  "columns": ["id", "GAR_ID", "GAR_Name", "GAR_Short_Label", "GAR_Long_Label", "GAR_Start_Date", "GAR_End_Date", "GAR_Description", "GAR_Reference", "CreatedBy", "CreatedOn", "ModifiedBy", "ModifiedOn", "GAR_Size"],
+  "geometry_type": "POLYGON",
+  "crs_epsg": 6932,
+  "bbox": {
+    "xmin": -2339491.0941,
+    "ymin": -3237492.0527,
+    "xmax": 1519979.6572,
+    "ymax": 2375898.0498
+  }
+}

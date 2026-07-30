@@ -1,0 +1,13 @@
+{
+  "layer": "omas_6932",
+  "n_features": 8,
+  "columns": ["id", "GAR_ID", "GAR_Name", "GAR_Short_Label", "GAR_Long_Label", "GAR_Start_Date", "GAR_End_Date", "GAR_Description", "GAR_Reference", "GAR_Parent_ID", "ATY_ID", "CreatedBy", "CreatedOn", "ModifiedBy", "ModifiedOn", "GAR_Size"],
+  "geometry_type": "MULTIPOLYGON",
+  "crs_epsg": 6932,
+  "bbox": {
+    "xmin": -3053462.3825,
+    "ymin": -3309402.9363,
+    "xmax": 1654909.7755,
+    "ymax": 3426302.521
+  }
+}

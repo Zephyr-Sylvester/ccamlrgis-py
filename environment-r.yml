@@ -1,0 +1,38 @@
+# Separate, R-only environment used solely to generate the G0 golden reference
+# outputs (tools/export_r_reference.R) that the Python test suite is validated
+# against. Deliberately kept apart from environment.yml: mixing R's and
+# Python's compiled geospatial stacks (sf/terra vs geopandas/rasterio) in one
+# conda env is a common source of GDAL/GEOS/PROJ ABI conflicts.
+#
+# The system Rscript found in this environment (/usr/local/bin/Rscript, R
+# 4.1.2) does NOT have CCAMLRGIS, sf, terra, lwgeom, or bezier installed, and
+# is old enough that current CRAN macOS binaries may not target it. Use this
+# conda env instead of the system R.
+#
+# CCAMLRGIS itself is on CRAN but not on conda-forge (checked: no
+# `r-ccamlrgis` feedstock exists), so it must be installed with
+# install.packages() after the env is created:
+#
+#   conda env create -f environment-r.yml
+#   conda run -n ccamlrgis-r Rscript -e \
+#     'install.packages("CCAMLRGIS", repos = "https://cloud.r-project.org")'
+#
+# r-base is pinned >=4.4 (not a specific minor) because r-lwgeom's
+# conda-forge builds only target R >=4.4; letting conda pick the newest
+# compatible R avoids fighting the solver over an exact minor version.
+
+name: ccamlrgis-r
+channels:
+  - conda-forge
+  - nodefaults
+channel_priority: strict
+dependencies:
+  - r-base>=4.4
+  - r-sf
+  - r-terra
+  - r-dplyr
+  - r-isoband
+  - r-lwgeom
+  - r-bezier
+  - r-magrittr
+  - r-devtools     # fallback: install.packages()/remotes if CRAN binary unavailable

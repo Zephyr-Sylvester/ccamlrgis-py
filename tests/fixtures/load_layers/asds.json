@@ -1,0 +1,13 @@
+{
+  "layer": "statistical_areas_6932",
+  "n_features": 19,
+  "columns": ["id", "GAR_ID", "GAR_Name", "GAR_Short_Label", "GAR_Long_Label", "GAR_Start_Date", "GAR_End_Date", "GAR_Description", "GAR_Reference", "GAR_Parent_ID", "ATY_ID", "CreatedBy", "CreatedOn", "ModifiedBy", "ModifiedOn", "GAR_Description_HTML", "GAR_Size"],
+  "geometry_type": "POLYGON",
+  "crs_epsg": 6932,
+  "bbox": {
+    "xmin": -3348555.9056,
+    "ymin": -3329338.5576,
+    "xmax": 4815054.821,
+    "ymax": 4371126.9006
+  }
+}

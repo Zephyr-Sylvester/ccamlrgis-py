@@ -1,0 +1,13 @@
+{
+  "layer": "eez_6932",
+  "n_features": 4,
+  "columns": ["id", "GAR_ID", "GAR_Name", "GAR_Short_Label", "GAR_Long_Label", "GAR_Start_Date", "GAR_End_Date", "GAR_Description", "GAR_Reference", "GAR_Parent_ID", "ATY_ID", "CreatedBy", "CreatedOn", "ModifiedBy", "ModifiedOn"],
+  "geometry_type": "POLYGON",
+  "crs_epsg": 6932,
+  "bbox": {
+    "xmin": 2479254.5895,
+    "ymin": 735485.5126,
+    "xmax": 4577505.5165,
+    "ymax": 4092303.6027
+  }
+}

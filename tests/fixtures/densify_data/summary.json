@@ -1,0 +1,42 @@
+{
+  "simple_box": {
+    "n_in": 5,
+    "n_out": 403,
+    "warnings": []
+  },
+  "antimeridian_ccw": {
+    "n_in": 2,
+    "n_out": 206,
+    "warnings": []
+  },
+  "antimeridian_cw": {
+    "n_in": 2,
+    "n_out": 206,
+    "warnings": []
+  },
+  "exactly_180_wide": {
+    "n_in": 2,
+    "n_out": 1801,
+    "warnings": "A line is exactly 180 degrees wide in longitude\nPlease add an intermediate point in the line\n"
+  },
+  "iso_longitude": {
+    "n_in": 2,
+    "n_out": 2,
+    "warnings": []
+  },
+  "building_polygons_P1": {
+    "n_in": 5,
+    "n_out": 227,
+    "warnings": []
+  },
+  "building_polygons_P2": {
+    "n_in": 5,
+    "n_out": 123,
+    "warnings": []
+  },
+  "building_polygons_P3": {
+    "n_in": 5,
+    "n_out": 203,
+    "warnings": []
+  }
+}
