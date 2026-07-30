@@ -3,6 +3,43 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (5) — ccamlrgis.validate.check_geospatial_rules
+
+### Done
+
+- `src/ccamlrgis/validate.py`: `check_geospatial_rules(gdf, ...)` per §2,
+  checking CRS (EPSG:6932), no un-densified segment > `dlon`, clockwise
+  polygon exterior rings, geometry validity, and (only if `source_coords`
+  is supplied) coordinate precision ≥5 decimals. Returns a
+  `GeospatialRulesReport` (truthy iff clean) of `Violation` dataclasses.
+  Namespaced under `ccamlrgis.validate` only (new Python-only
+  functionality, no R equivalent to match §5's export convention against).
+  9 new tests, **108/108 tests pass** (88 offline + 20 network).
+- Found and fixed two real bugs while smoke-testing against real output
+  (`create_polys(PolyData)`, which includes an antimeridian-crossing
+  polygon, and the Building-Polygons example): (1) the densify check had
+  no float tolerance, so segments densified at exactly `dlon` spacing
+  falsely tripped as "0.100 > 0.1" after the projected round-trip; (2) the
+  orientation check's shoelace formula didn't unwrap longitude across
+  +/-180, so it completely misjudged the winding direction of any ring
+  that legitimately crosses the antimeridian (like PolyData's polygon
+  "two"). Both fixed; `create_polys`' own output on both test datasets now
+  reports clean, confirming these were checker bugs, not real rule
+  violations in already-validated code.
+- `cite.py` (`layer_citation`, `.attrs["citation"]`, `basemap`'s
+  `attribution=`) -- the other half of §2 -- is not done yet; flagging
+  since it's easy to conflate with "geospatial rules" but is a separate
+  piece of work.
+
+### Next
+
+1. `cite.py` (§2's other half).
+2. The Building-Polygons end-to-end test (as a plain pytest test first,
+   per the agreed efficient ordering).
+3. The four notebooks + `nbval` in CI.
+4. `README.md` full tutorial.
+5. `mypy --strict` compliance (last, one consolidated pass).
+
 ## 2026-07-30 (4) — LICENSE + NOTICE
 
 Added `LICENSE` (canonical GPL-3.0 text, fetched directly from

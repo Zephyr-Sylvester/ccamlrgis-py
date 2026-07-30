@@ -101,6 +101,12 @@ False` keyword (§1.3 caching contract) with no R equivalent.
 | `add_RefGrid(bb, ResLat=1, ResLon=2, LabLon=NA, LatR=c(-80,-45), lwd=1, lcol="black", fontsize=1, fontcol="black", offset=NA)` | `ccamlrgis.plot.add_reference_grid(ax, bounds=None, res_lat=1, res_lon=2, lab_lon=None, lat_range=(-80,-45), linewidth=1, line_colour="black", fontsize=10, font_colour="black", offset=None)` | `bb` → `bounds` (defaults to `ax`'s current data limits); labels always on the left/bottom edges rather than R's edge-selection heuristic — see deviation 16 |
 | `add_labels(mode=NULL, layer=NULL, fontsize=1, fonttype=1, angle=0, col='black', LabelTable=NULL)` | `ccamlrgis.plot.add_labels(ax, mode='auto', layer=None, labels_data=None, label_table=None, fontsize=10, fonttype=1, angle=0, colour='black')` | `mode='manual'` (interactive `terra::click`) **not ported**; only `mode='auto'`/`mode='table'` exist in Python; `mode='auto'` needs `labels_data=` (e.g. the `Labels` example dataset) since Python has no bundled data |
 
+## Other new, Python-only additions (no R equivalent)
+
+| Python | Notes |
+|---|---|
+| `ccamlrgis.validate.check_geospatial_rules(gdf, dlon=0.1, check_orientation=True, source_coords=None)` | §2's geospatial rules encoded as code rather than left as prose: CRS is EPSG:6932, no un-densified segment exceeds `dlon`, polygon exterior rings are clockwise (antimeridian-aware), geometry validity, and (only if `source_coords` is supplied) coordinate precision ≥5 decimals. Returns a `GeospatialRulesReport` (truthy iff no violations) with a list of `Violation(rule, message, index)`. |
+
 ## Data column names — kept as R spellings (deliberate asymmetry)
 
 Function and argument names are pure `snake_case`. Column names *inside*
