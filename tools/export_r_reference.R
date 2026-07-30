@@ -168,6 +168,11 @@ st_write(clip_output, "tests/fixtures/clip_to_coast/output.gpkg", quiet = TRUE, 
 record("tests/fixtures/clip_to_coast/input.gpkg")
 record("tests/fixtures/clip_to_coast/output.gpkg")
 
+# The exact `coast` layer Clip2Coast differenced against, so the Python port
+# can be tested without needing the (not yet built) hosted-data pipeline.
+st_write(Coast[Coast$ID == "All", ], "tests/fixtures/clip_to_coast/coast_all.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/clip_to_coast/coast_all.gpkg")
+
 cat(sprintf(
   "clip_to_coast: %d polygons, areas (Clipped_AreaKm2 / Buffered_and_clipped_AreaKm2) recorded\n",
   nrow(clip_output)

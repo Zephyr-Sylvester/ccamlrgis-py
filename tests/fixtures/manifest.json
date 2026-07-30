@@ -85,12 +85,16 @@
       "bytes": 747
     },
     "tests/fixtures/clip_to_coast/input.gpkg": {
-      "sha256": "3cb64afbb61b1ec472b10d3d24037ca3fa4064735013d593720ea2844d40cf45",
+      "sha256": "ba3dc8dafec6eab3823da83c71b6faf5aa8a40ec12ba02ef518789ccfecd6236",
       "bytes": 122880
     },
     "tests/fixtures/clip_to_coast/output.gpkg": {
-      "sha256": "542e51a731f18fb826f5221b89f15b8e8dbea3b7763b3d7c6d6ee0d62013d726",
+      "sha256": "2b47486a53f74a567fce197dff0f23d93696b09114f511fbf3cd9359099583dc",
       "bytes": 131072
+    },
+    "tests/fixtures/clip_to_coast/coast_all.gpkg": {
+      "sha256": "403d8520bd52c0586c9136d9b59df67ccefa6bd33220da6cda4627e2611bfead",
+      "bytes": 1028096
     },
     "tests/fixtures/load_layers/asds.json": {
       "sha256": "2cac9da411860a9982805132ad67c035e30992ab4092f9b71376c14852a34b82",

@@ -3,6 +3,40 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-29 (3) — cache.py, load.py, clip_to_coast
+
+### Done
+
+- `src/ccamlrgis/cache.py`: download-on-demand cache per §1.3 (explicit
+  `path=` > `CCAMLRGIS_CACHE_DIR` env var > platformdirs), conditional
+  requests (ETag/If-Modified-Since), atomic write, `manifest.json` with
+  SHA-256, `CCAMLRGISOfflineError`, `prefetch()`, `info()`. Kept lean: no
+  retry logic or progress bars yet (progress is a separate optional-extra
+  concern per §3, not needed for correctness).
+- `src/ccamlrgis/load.py`: all 8 WFS loaders (`load_asds` ... `load_eezs`)
+  plus `load_bathy`, all over https (R's hardcoded http 403s, see the
+  2026-07-29 (1) entry below).
+- `clip_to_coast` added to `analysis.py`. Deviation: `coast` is a required
+  argument for now rather than defaulting to a cache-backed low-res `Coast`
+  fetch, since that needs the §4 data-publishing pipeline (GitHub Release
+  assets), which doesn't exist yet — logged as porting_notes.md deviation 8.
+- Extended `tools/export_r_reference.R` to also export the exact `Coast`
+  row (`ID=='All'`) that R's `Clip2Coast` differenced against, so
+  `clip_to_coast` could be tested end-to-end without needing that pipeline.
+- Tests: `test_cache.py` (offline, mocked HTTP), `test_clip_to_coast.py`
+  (against the new fixture), `test_load.py` (`pytest -m network`, structural
+  checks against `tests/fixtures/load_layers/*.json` — not exact-geometry,
+  since these functions fetch CCAMLR's live data by design). **24/24 tests
+  pass** (16 offline + 8 live network, run against the real WFS today).
+
+### Next
+
+1. GitHub Actions CI (single Python version on ubuntu to start).
+2. `datasets.py` + §4 data-publishing pipeline (unblocks `clip_to_coast`'s
+   default `coast=`, `small_bathy()`, and the bundled example datasets).
+3. Phase 2: `_build_polys`/`_build_lines`/`_build_points`, `create_polys`
+   etc., validated against new G2 fixtures.
+
 ## 2026-07-29 (2) — Phase 1 implementation: project_data, densify_data
 
 ### Done

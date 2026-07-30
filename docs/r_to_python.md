@@ -80,7 +80,7 @@ False` keyword (§1.3 caching contract) with no R equivalent.
 | R | Python | Notes |
 |---|---|---|
 | `project_data(Input, NamesIn=NULL, NamesOut=NULL, append=TRUE, inv=FALSE)` | `project_data(input, names_in=None, names_out=None, append=True, inverse=False)` | `inv=` → `inverse=`; NA-fill/restore behaviour and "not on Earth" warnings preserved verbatim as `warnings.warn` |
-| `Clip2Coast(Input)` | `clip_to_coast(input, coast=None)` | Python adds `coast=` to allow a user-supplied (e.g. higher-res) coastline; defaults to a cached fetch |
+| `Clip2Coast(Input)` | `clip_to_coast(input, coast)` | `coast` is required for now (temporary, see `porting_notes.md` deviation 8) — pass e.g. `load_coastline()`; a cache-backed default matching R's bundled low-res `Coast` will land once the §4 data pipeline exists |
 | `assign_areas(Input, Polys, AreaNameFormat='GAR_Long_Label', Buffer=0, NamesIn=NULL, NamesOut=NULL)` | `assign_areas(input, polys, area_name_format='GAR_Long_Label', buffer=0, names_in=None, names_out=None)` | |
 | `get_depths(Input, Bathy, NamesIn=NULL)` | `get_depths(input, bathy, names_in=None)` | |
 | `seabed_area(Bathy, Poly, PolyNames=NULL, depth_classes=c(-600,-1800))` | `seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800))` | |
