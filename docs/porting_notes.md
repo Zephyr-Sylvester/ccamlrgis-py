@@ -6,10 +6,11 @@ reason, and the impact on users. Nothing in this list is accidental — where
 the R package rounds, sorts, or uses a particular statistic, the port matches
 it unless a deviation is logged below (§7.6 of the port design).
 
-Status: Phase 1 in progress (`project_data`, `densify_data` implemented and
-passing against G1 fixtures). Deviations 1-6 below were known up front from
-the design decisions in §1-§2 of the port design and logged pre-emptively per
-§7.4; deviation 7 was found while implementing `densify_data`.
+Status: Phases 1-4 implemented and passing against G0-G4 fixtures (all
+"create"/"load"/analysis functions except `create_stations`, which is
+deliberately deferred -- see PROGRESS.md). Deviations 1-6 below were known
+up front from the design decisions in §1-§2 of the port design and logged
+pre-emptively per §7.4; deviations 7-13 were found during implementation.
 
 ## 1. Plotting: stateful base graphics → explicit Axes
 
@@ -298,3 +299,27 @@ switching to a real smooth-contour library (e.g. `contourpy`, which
 matplotlib itself now uses and which doesn't require a plotting backend)
 would close this gap and is a reasonable future improvement, not attempted
 here to avoid a new dependency for a first pass.
+
+## 13. Phase 4 secondary code paths: implemented, lighter-touch tested
+
+**Scope:** `create_pies`'s `grid_km=` + `size_var=` combination, and
+`create_circular_arrow`'s `n_arrows > 1` path, are both translated directly
+from the R source (`Pies.R`, `create_CircularArrow.R`) but were not
+validated against a dedicated R fixture the way every other code path in
+this port has been -- only smoke-tested (they run and produce plausible
+output).
+
+**Reason:** both are secondary combinations of already-tested primary
+paths (gridding alone and `size_var` alone are each fixture-tested;
+`n_arrows=1`, the R docstring's own default, is fixture-tested). Building
+dedicated R fixtures for every combination would be disproportionate to
+how often these specific combinations are likely to be used, given the
+time already spent on this phase's five genuinely new, complex geometry
+algorithms (Bezier curves, convex hulls, perpendicular offsets, elliptical
+paths). This follows the same pattern as `get_iso_polys`'s `grp=True` and
+`create_polygrids`'s blank+equal-area combination earlier in the port.
+
+**Impact on users:** these two specific combinations carry less
+faithfulness confidence than the rest of the library. If a bug surfaces in
+either, it's a reasonable place to look first; a fixture-validated test
+for each would be a good, scoped follow-up.

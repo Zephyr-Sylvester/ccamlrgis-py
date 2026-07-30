@@ -387,6 +387,63 @@ cat(sprintf(
 ))
 
 # ---------------------------------------------------------------------------
+# 8. Phase 4 (G4): create_Pies, create_Ellipse, create_Hashes, create_Arrow,
+#    create_CircularArrow -- geometry only, no plotting.
+# ---------------------------------------------------------------------------
+dir.create("tests/fixtures/create_pies", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_ellipse", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_hashes", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_arrow", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/create_circular_arrow", showWarnings = FALSE, recursive = TRUE)
+
+write.csv(PieData, "tests/fixtures/example_data/PieData.csv", row.names = FALSE)
+write.csv(PieData2, "tests/fixtures/example_data/PieData2.csv", row.names = FALSE)
+record("tests/fixtures/example_data/PieData.csv")
+record("tests/fixtures/example_data/PieData2.csv")
+
+# create_Pies (docstring example: constant size, all classes)
+pies_out <- create_Pies(Input = PieData, NamesIn = c("Lat", "Lon", "Sp", "N"), Size = 50)
+st_write(pies_out, "tests/fixtures/create_pies/piedata_default.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_pies/piedata_default.gpkg")
+
+# create_Ellipse (docstring example)
+ellipse_out <- create_Ellipse(Latc = -61, Lonc = -50, Lmaj = 500, Lmin = 250, Ang = 120)
+st_write(ellipse_out, "tests/fixtures/create_ellipse/example.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_ellipse/example.gpkg")
+
+# create_Hashes (docstring example, first polygon of PolyData)
+hashes_polys <- create_Polys(Input = PolyData)
+hashes_out <- create_Hashes(pol = hashes_polys[1, ], angle = 45, spacing = 1, width = 1)
+st_write(st_sf(geometry = hashes_out), "tests/fixtures/create_hashes/polydata_one.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_hashes/polydata_one.gpkg")
+
+# create_Arrow: docstring examples 1 (straight), 2 (one bend), 4 (weighted bend + big head)
+arrow1_in <- data.frame(lat = c(-61, -52), lon = c(-60, -40))
+arrow1_out <- create_Arrow(Input = arrow1_in)
+st_write(arrow1_out, "tests/fixtures/create_arrow/example1_straight.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_arrow/example1_straight.gpkg")
+
+arrow2_in <- data.frame(lat = c(-61, -65, -52), lon = c(-60, -45, -40))
+arrow2_out <- create_Arrow(Input = arrow2_in, Acol = "lightblue")
+st_write(arrow2_out, "tests/fixtures/create_arrow/example2_bend.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_arrow/example2_bend.gpkg")
+
+arrow4_in <- data.frame(lat = c(-61, -60, -65, -52), lon = c(-60, -50, -45, -40), w = c(1, 1, 2, 1))
+arrow4_out <- create_Arrow(Input = arrow4_in, Acol = "lightblue", Hlength = 20, Hwidth = 20)
+st_write(arrow4_out, "tests/fixtures/create_arrow/example4_weighted.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_arrow/example4_weighted.gpkg")
+
+# create_CircularArrow (docstring default example)
+circ_arrow_out <- create_CircularArrow()
+st_write(circ_arrow_out, "tests/fixtures/create_circular_arrow/default.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/create_circular_arrow/default.gpkg")
+
+cat(sprintf(
+  "Phase 4: create_pies(%d), create_ellipse(%d), create_hashes, create_arrow(%d,%d,%d), create_circular_arrow(%d)\n",
+  nrow(pies_out), nrow(ellipse_out), nrow(arrow1_out), nrow(arrow2_out), nrow(arrow4_out), nrow(circ_arrow_out)
+))
+
+# ---------------------------------------------------------------------------
 # manifest
 # ---------------------------------------------------------------------------
 jsonlite::write_json(

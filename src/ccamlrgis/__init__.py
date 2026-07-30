@@ -23,6 +23,8 @@ from .load import (
     load_ssmus,
     load_ssrus,
 )
+from .pies import create_pies
+from .shapes import create_arrow, create_circular_arrow, create_ellipse, create_hashes
 
 __version__ = "0.1.0.dev0"
 
@@ -43,6 +45,11 @@ __all__ = [
     "get_c_intersection",
     "get_iso_polys",
     "rotate_obj",
+    "create_pies",
+    "create_arrow",
+    "create_circular_arrow",
+    "create_ellipse",
+    "create_hashes",
     "load_asds",
     "load_ssrus",
     "load_coastline",

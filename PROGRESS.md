@@ -3,6 +3,45 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-29 (6) — Phase 4: create_pies, create_arrow, create_circular_arrow, create_ellipse, create_hashes
+
+### Done
+
+- `src/ccamlrgis/pies.py` (`create_pies`) and `src/ccamlrgis/shapes.py`
+  (`create_ellipse`, `create_hashes`, `create_arrow`,
+  `create_circular_arrow`, plus the private `_get_perpendicular` (R:
+  `GetPerp`) and `_bezier_curve` helpers) -- all of Phase 4 (§5's "Shapes
+  and pies" table). Vendored a small Bernstein-basis Bezier evaluator
+  rather than adding a dependency for one function (design doc's own
+  suggestion). Validated against new G4 fixtures. **48/48 tests pass**
+  (39 offline + 9 network).
+- Found and fixed a real naming-consistency bug while implementing
+  `create_arrow`: its output colour column was named `"colour"`, breaking
+  the project's own rule that returned *data* columns keep R's spelling
+  (`"col"`) while only function/argument names are snake_case. Fixed
+  before it shipped anywhere.
+- One new deviation logged (`porting_notes.md` 13): `create_pies`'s
+  `grid_km=`+`size_var=` combination and `create_circular_arrow`'s
+  `n_arrows>1` path are implemented but only smoke-tested, not
+  fixture-validated -- both are secondary combinations of already-tested
+  primary paths, and building dedicated fixtures for every combination
+  wasn't a good use of time against this phase's five new, genuinely
+  complex geometry algorithms (Bezier curves, convex hulls, perpendicular
+  offsets, elliptical paths).
+
+### Next
+
+All five phases of §5's function inventory are now done except
+`create_stations` (deliberately deferred since Phase 3, needs its own
+distributional validation harness). Remaining work:
+
+1. `create_stations`.
+2. GitHub Actions CI.
+3. `datasets.py` + §4 data-publishing pipeline.
+4. Phase 5: plotting helpers (`add_colour_scale`, `add_legend`,
+   `add_pie_legend`, `add_reference_grid`, `add_labels`, `plot.basemap`) --
+   the `ccamlrgis.plot` submodule, the only place matplotlib gets imported.
+
 ## 2026-07-29 (5) — Phase 3: get_depths, seabed_area, get_c_intersection, get_iso_polys, rotate_obj
 
 ### Done

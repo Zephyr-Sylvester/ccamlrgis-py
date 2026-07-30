@@ -10,6 +10,9 @@ _NAMED_COLOURS = {
     "blue": "#0000ff", "yellow": "#ffff00", "cyan": "#00ffff", "magenta": "#ff00ff",
     "grey": "#bebebe", "gray": "#bebebe", "orange": "#ffa500", "purple": "#a020f0",
     "pink": "#ffc0cb", "brown": "#a52a2a",
+    "lightblue": "#add8e6", "darkblue": "#00008b", "lightgreen": "#90ee90",
+    "darkgreen": "#006400", "darkred": "#8b0000", "lightgrey": "#d3d3d3",
+    "lightgray": "#d3d3d3", "darkgrey": "#a9a9a9", "darkgray": "#a9a9a9",
 }
 
 
