@@ -9,7 +9,17 @@ label table and passing it via mode='table'.
 import matplotlib.pyplot as plt
 
 
-def add_labels(ax=None, mode="auto", layer=None, labels_data=None, label_table=None, fontsize=10, fonttype=1, angle=0, colour="black"):
+def add_labels(
+    ax=None,
+    mode="auto",
+    layer=None,
+    labels_data=None,
+    label_table=None,
+    fontsize=10,
+    fonttype=1,
+    angle=0,
+    colour="black",
+):
     """Add text labels to a plot.
 
     mode='auto': label the centres of polygon parts of layers loaded via
@@ -40,20 +50,36 @@ def add_labels(ax=None, mode="auto", layer=None, labels_data=None, label_table=N
         rows = labels_data[labels_data["p"].isin(layers)]
         for _, row in rows.iterrows():
             artists.append(
-                ax.text(row["x"], row["y"], row["t"], fontsize=fontsize, rotation=angle, color=colour, weight=weight, style=style, ha="center", va="center")
+                ax.text(
+                    row["x"],
+                    row["y"],
+                    row["t"],
+                    fontsize=fontsize,
+                    rotation=angle,
+                    color=colour,
+                    weight=weight,
+                    style=style,
+                    ha="center",
+                    va="center",
+                )
             )
     elif mode == "table":
         if label_table is None:
             raise ValueError("mode='table' requires label_table")
         for _, row in label_table.iterrows():
-            weight, style = _style(row["fonttype"] if "fonttype" in row else fonttype)
+            weight, style = _style(row.get("fonttype", fonttype))
             artists.append(
                 ax.text(
-                    row["x"], row["y"], row["text"],
-                    fontsize=row["fontsize"] if "fontsize" in row else fontsize,
-                    rotation=row["angle"] if "angle" in row else angle,
-                    color=row["col"] if "col" in row else colour,
-                    weight=weight, style=style, ha="center", va="center",
+                    row["x"],
+                    row["y"],
+                    row["text"],
+                    fontsize=row.get("fontsize", fontsize),
+                    rotation=row.get("angle", angle),
+                    color=row.get("col", colour),
+                    weight=weight,
+                    style=style,
+                    ha="center",
+                    va="center",
                 )
             )
     else:

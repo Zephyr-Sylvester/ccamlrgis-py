@@ -1,7 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import rioxarray  # noqa: F401
+import rioxarray
 
 from ccamlrgis import create_polys, get_iso_polys
 

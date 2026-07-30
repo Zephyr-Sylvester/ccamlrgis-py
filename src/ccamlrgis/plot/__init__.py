@@ -34,11 +34,11 @@ def basemap(ax=None, figsize=(8, 8), xlim=None, ylim=None):
 
 
 __all__ = [
-    "basemap",
+    "LegendItem",
     "add_colour_scale",
+    "add_labels",
     "add_legend",
     "add_pie_legend",
-    "LegendItem",
     "add_reference_grid",
-    "add_labels",
+    "basemap",
 ]

@@ -33,7 +33,19 @@ def _first_point(geom):
     return None
 
 
-def add_reference_grid(ax=None, bounds=None, res_lat=1, res_lon=2, lab_lon=None, lat_range=(-80, -45), linewidth=1, line_colour="black", fontsize=10, font_colour="black", offset=None):
+def add_reference_grid(
+    ax=None,
+    bounds=None,
+    res_lat=1,
+    res_lon=2,
+    lab_lon=None,
+    lat_range=(-80, -45),
+    linewidth=1,
+    line_colour="black",
+    fontsize=10,
+    font_colour="black",
+    offset=None,
+):
     """Add a Latitude/Longitude graticule to a map already in the CCAMLR
     CRS. CCAMLRGIS R: add_RefGrid.R.
 
@@ -70,8 +82,10 @@ def add_reference_grid(ax=None, bounds=None, res_lat=1, res_lon=2, lab_lon=None,
             artists.append(ax.plot(*seg.xy, linestyle=":", linewidth=linewidth, color=line_colour)[0])
         p = _first_point(line.intersection(left_edge))
         if p is not None:
-            label = f"{abs(int(round(lat)))}S"
-            artists.append(ax.text(p.x - off, p.y, label, fontsize=fontsize, color=font_colour, ha="right", va="center"))
+            label = f"{abs(round(lat))}S"
+            artists.append(
+                ax.text(p.x - off, p.y, label, fontsize=fontsize, color=font_colour, ha="right", va="center")
+            )
 
     for lon in lons:
         lat_line = np.linspace(lat_range[0], lat_range[1], 360)
@@ -84,9 +98,9 @@ def add_reference_grid(ax=None, bounds=None, res_lat=1, res_lon=2, lab_lon=None,
             if lon in (0, -180, 180):
                 label = "180" if abs(lon) == 180 else "0"
             elif lon < 0:
-                label = f"{abs(int(round(lon)))}W"
+                label = f"{abs(round(lon))}W"
             else:
-                label = f"{int(round(lon))}E"
+                label = f"{round(lon)}E"
             artists.append(ax.text(p.x, p.y - off, label, fontsize=fontsize, color=font_colour, ha="center", va="top"))
 
     return artists

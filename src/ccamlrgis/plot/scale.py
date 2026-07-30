@@ -8,7 +8,17 @@ import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
-def add_colour_scale(ax=None, cuts=None, cols=None, title="Depth (m)", loc="center right", width="8%", height="60%", fontsize=10, title_fontsize=None):
+def add_colour_scale(
+    ax=None,
+    cuts=None,
+    cols=None,
+    title="Depth (m)",
+    loc="center right",
+    width="8%",
+    height="60%",
+    fontsize=10,
+    title_fontsize=None,
+):
     """Add a discrete colour-class scale bar to `ax`. `cuts`/`cols` are
     typically produced by `add_colour()`. Returns the inset Axes created.
     """

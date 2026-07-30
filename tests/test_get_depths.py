@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import rioxarray  # noqa: F401
+import rioxarray
 
 from ccamlrgis import get_depths
 

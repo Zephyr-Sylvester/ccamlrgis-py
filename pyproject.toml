@@ -32,3 +32,9 @@ packages = ["src/ccamlrgis"]
 
 [tool.pytest.ini_options]
 markers = ["network: tests that require internet access"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "RUF", "SIM"]

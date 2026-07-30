@@ -1,8 +1,8 @@
 import geopandas as gpd
 import pandas as pd
+from conftest import assert_geom_equal
 
 from ccamlrgis import create_points
-from conftest import assert_geom_equal
 
 
 def test_pointdata_matches_r(fixtures):

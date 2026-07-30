@@ -167,7 +167,9 @@ def _build_points(input_df):
     return out
 
 
-def create_polys(input, names_in=None, buffer=0, densify=True, clip=False, separate_buffers=True, dlon=0.1, dlat=0.1, coast=None):
+def create_polys(
+    input, names_in=None, buffer=0, densify=True, clip=False, separate_buffers=True, dlon=0.1, dlat=0.1, coast=None
+):
     """Create polygons from a table of (ID, Lat, Lon) vertices. CCAMLRGIS R: create_Polys."""
     df = _reorder_columns(input.copy(), names_in, 3)
     output = _build_polys(df, densify=densify, dlon=dlon, dlat=dlat)
@@ -182,7 +184,9 @@ def create_polys(input, names_in=None, buffer=0, densify=True, clip=False, separ
     return output
 
 
-def create_lines(input, names_in=None, buffer=0, densify=False, clip=False, separate_buffers=True, dlon=0.1, dlat=0.1, coast=None):
+def create_lines(
+    input, names_in=None, buffer=0, densify=False, clip=False, separate_buffers=True, dlon=0.1, dlat=0.1, coast=None
+):
     """Create lines from a table of (ID, Lat, Lon) vertices. CCAMLRGIS R: create_Lines."""
     df = _reorder_columns(input.copy(), names_in, 3)
     output = _build_lines(df, densify=densify, dlon=dlon, dlat=dlat)
@@ -234,8 +238,8 @@ def _degree_grid_polygon(glon, glat, dlon, dlat):
         top = np.unique(np.concatenate([[xmin], _seq_inclusive(xmin, xmax, 0.1), [xmax]]))
         lons = list(top) + list(top[::-1])
         lats = [ymax] * len(top) + [ymin] * len(top)
-    lons = lons + [lons[0]]
-    lats = lats + [lats[0]]
+    lons = [*lons, lons[0]]
+    lats = [*lats, lats[0]]
     return Polygon(np.column_stack([lons, lats]))
 
 
@@ -276,7 +280,9 @@ def _match_points_to_cells(lats, lons, group):
     return result
 
 
-def create_polygrids(input, names_in=None, dlon=None, dlat=None, area=None, cuts=100, cols=("green", "yellow", "red"), blank=False):
+def create_polygrids(
+    input, names_in=None, dlon=None, dlat=None, area=None, cuts=100, cols=("green", "yellow", "red"), blank=False
+):
     """Create a polygon grid to spatially aggregate data, in cells of a
     fixed lon/lat size (``dlon``/``dlat``) or of equal area (``area``, km2).
     ``blank=True`` produces an empty grid spanning ``input`` as
@@ -304,9 +310,7 @@ def create_polygrids(input, names_in=None, dlon=None, dlat=None, area=None, cuts
     if area is None:
         # degree-cell mode
         if blank:
-            glon, glat = np.meshgrid(
-                _seq_inclusive(lon_min, lon_max, dlon), _seq_inclusive(lat_min, lat_max, dlat)
-            )
+            glon, glat = np.meshgrid(_seq_inclusive(lon_min, lon_max, dlon), _seq_inclusive(lat_min, lat_max, dlat))
             glon, glat = glon.ravel(), glat.ravel()
         else:
             snapped_lon = np.ceil((data["lon"] + dlon) / dlon) * dlon - dlon - dlon / 2
@@ -347,7 +351,10 @@ def create_polygrids(input, names_in=None, dlon=None, dlat=None, area=None, cuts
                 p_lon = np.concatenate([lons, lons[::-1], [lons[0]]])
                 p_lat = np.concatenate([np.full(len(lons), lat_n), np.full(len(lons), lat_s), [lat_n]])
                 pro = project_data(
-                    pd.DataFrame({"Lat": p_lat, "Lon": p_lon}), names_in=["Lat", "Lon"], names_out=["y", "x"], append=False
+                    pd.DataFrame({"Lat": p_lat, "Lon": p_lon}),
+                    names_in=["Lat", "Lon"],
+                    names_out=["y", "x"],
+                    append=False,
                 )
                 return Polygon(np.column_stack([pro["x"], pro["y"]]))
 
@@ -375,7 +382,10 @@ def create_polygrids(input, names_in=None, dlon=None, dlat=None, area=None, cuts
                 p_lon = np.concatenate([lons, lons[::-1], [lons[0]]])
                 p_lat = np.concatenate([np.full(len(lons), lat_n), np.full(len(lons), lat_s), [lat_n]])
                 pro = project_data(
-                    pd.DataFrame({"Lat": p_lat, "Lon": p_lon}), names_in=["Lat", "Lon"], names_out=["y", "x"], append=False
+                    pd.DataFrame({"Lat": p_lat, "Lon": p_lon}),
+                    names_in=["Lat", "Lon"],
+                    names_out=["y", "x"],
+                    append=False,
                 )
                 polygons.append(Polygon(np.column_stack([pro["x"], pro["y"]])))
 
@@ -390,7 +400,11 @@ def create_polygrids(input, names_in=None, dlon=None, dlat=None, area=None, cuts
     group["Centrex"] = centroids.x
     group["Centrey"] = centroids.y
     cen_ll = project_data(
-        group[["Centrey", "Centrex"]], names_in=["Centrey", "Centrex"], names_out=["Centrelat", "Centrelon"], append=False, inverse=True
+        group[["Centrey", "Centrex"]],
+        names_in=["Centrey", "Centrex"],
+        names_out=["Centrelat", "Centrelon"],
+        append=False,
+        inverse=True,
     )
     group["Centrelon"] = cen_ll["Centrelon"]
     group["Centrelat"] = cen_ll["Centrelat"]

@@ -31,15 +31,32 @@ def _handle_for(item):
     if item.shape not in _SHAPES:
         raise ValueError(f"'shape' must be one of {_SHAPES}, got {item.shape!r}")
     if item.shape == "rectangle":
-        return mpatches.Rectangle((0, 0), 1, 1, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth, hatch=item.hatch)
+        return mpatches.Rectangle(
+            (0, 0), 1, 1, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth, hatch=item.hatch
+        )
     if item.shape == "circle":
-        return mpatches.Circle((0.5, 0.5), 0.5, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth, hatch=item.hatch)
+        return mpatches.Circle(
+            (0.5, 0.5), 0.5, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth, hatch=item.hatch
+        )
     if item.shape == "ellipse":
-        return mpatches.Ellipse((0.5, 0.5), 1, 0.6, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth, hatch=item.hatch)
+        return mpatches.Ellipse(
+            (0.5, 0.5), 1, 0.6, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth, hatch=item.hatch
+        )
     if item.shape == "line":
         return mlines.Line2D([], [], color=item.fill, linewidth=item.linewidth * 2)
     if item.shape == "arrow":
-        return mpatches.FancyArrow(0, 0.5, 1, 0, width=0.15, head_width=0.4, head_length=0.3, facecolor=item.fill, edgecolor=item.border, linewidth=item.linewidth)
+        return mpatches.FancyArrow(
+            0,
+            0.5,
+            1,
+            0,
+            width=0.15,
+            head_width=0.4,
+            head_length=0.3,
+            facecolor=item.fill,
+            edgecolor=item.border,
+            linewidth=item.linewidth,
+        )
     return mpatches.Rectangle((0, 0), 1, 1, alpha=0)  # "none": blank space for the text only
 
 
@@ -56,8 +73,13 @@ def add_legend(ax=None, items=None, title=None, subtitle=None, loc="lower right"
         legend_title = f"{title}\n{subtitle}" if title else subtitle
 
     return ax.legend(
-        handles, labels, loc=loc, title=legend_title, fontsize=fontsize,
-        title_fontsize=title_fontsize or fontsize * 1.15, frameon=True,
+        handles,
+        labels,
+        loc=loc,
+        title=legend_title,
+        fontsize=fontsize,
+        title_fontsize=title_fontsize or fontsize * 1.15,
+        frameon=True,
     )
 
 

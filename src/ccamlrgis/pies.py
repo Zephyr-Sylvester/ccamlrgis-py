@@ -8,7 +8,17 @@ from .colours import _ramp_palette
 from .crs import CCAMLR_CRS
 
 
-def create_pies(input, names_in=None, classes=None, cols=("green", "red"), size=50, size_var=None, grid_km=None, other=0, other_col="grey"):
+def create_pies(
+    input,
+    names_in=None,
+    classes=None,
+    cols=("green", "red"),
+    size=50,
+    size_var=None,
+    grid_km=None,
+    other=0,
+    other_col="grey",
+):
     """Pie-chart polygons for overlaying on a map: one pie per location,
     slices sized by each class's share of the total. CCAMLRGIS R: Pies.R
     (create_Pies). Returns a GeoDataFrame with a `col` colour column --
@@ -27,7 +37,7 @@ def create_pies(input, names_in=None, classes=None, cols=("green", "red"), size=
         if size_var not in df.columns:
             raise ValueError("'size_var' does not match any column name in 'input'")
         if size_var not in names_in:
-            names_in = names_in + [size_var]
+            names_in = [*names_in, size_var]
 
     d = df[names_in].copy()
     if len(names_in) == 4:
@@ -89,8 +99,8 @@ def create_pies(input, names_in=None, classes=None, cols=("green", "red"), size=
 
     cols_ramp = _ramp_palette(cols, len(classes))
     if "Other" in d["Cl"].values and "Other" not in classes:
-        classes = list(classes) + ["Other"]
-        cols_ramp = cols_ramp + _ramp_palette([other_col], 1)
+        classes = [*list(classes), "Other"]
+        cols_ramp = [*cols_ramp, *_ramp_palette([other_col], 1)]
 
     class_index = {c: i for i, c in enumerate(classes)}
     d["col"] = [cols_ramp[class_index[c]] for c in d["Cl"]]

@@ -4,7 +4,7 @@ http://, which now returns 403 Forbidden from CCAMLR's server (confirmed
 """
 
 import geopandas as gpd
-import rioxarray  # noqa: F401 -- registers the .rio accessor on xarray.DataArray
+import rioxarray
 
 from . import cache
 from .crs import CCAMLR_CRS

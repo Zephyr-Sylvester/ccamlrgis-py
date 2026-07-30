@@ -1,4 +1,5 @@
 import warnings
+from itertools import pairwise
 
 import geopandas as gpd
 import numpy as np
@@ -41,9 +42,7 @@ def project_data(input, names_in=None, names_out=None, append=True, inverse=Fals
         warnings.warn(f"{n_missing} records are missing location and will not be projected\n")
 
     if not inverse:
-        impossible = (
-            (locs[:, 0] > 180) | (locs[:, 0] < -180) | (locs[:, 1] > 90) | (locs[:, 1] < -90)
-        )
+        impossible = (locs[:, 0] > 180) | (locs[:, 0] < -180) | (locs[:, 1] > 90) | (locs[:, 1] < -90)
         n_impossible = int(impossible.sum())
         if n_impossible == 1:
             warnings.warn("One record is not on Earth and will not be projected\n")
@@ -256,7 +255,7 @@ def seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800)):
     px_w, px_h = bathy.rio.resolution()
     pixel_area_km2 = abs(px_w * px_h) / 1_000_000
 
-    pairs = list(zip(depth_classes[:-1], depth_classes[1:]))
+    pairs = list(pairwise(depth_classes))
     col_names = [f"{a}|{b}" for a, b in pairs]
 
     rows = []
@@ -336,7 +335,10 @@ def get_iso_polys(rast, poly=None, cuts=None, cols=("green", "yellow", "red"), g
 
     if grp:
         cs = cs.reset_index(drop=True)
-        touches = [cs.geometry.iloc[i:].index[cs.geometry.iloc[i:].touches(cs.geometry.iloc[i])].tolist() for i in range(len(cs))]
+        touches = [
+            cs.geometry.iloc[i:].index[cs.geometry.iloc[i:].touches(cs.geometry.iloc[i])].tolist()
+            for i in range(len(cs))
+        ]
         group = np.full(len(cs), np.nan)
         group[0] = 1
         for i in range(1, len(cs)):
@@ -344,7 +346,7 @@ def get_iso_polys(rast, poly=None, cuts=None, cols=("green", "yellow", "red"), g
             if not neighbours:
                 group[i] = group[i - 1] + 1
             elif np.isnan(group[i]):
-                idx = [i] + neighbours
+                idx = [i, *neighbours]
                 group[np.array(idx)] = group[i - 1] + 1
         cs["Grp"] = group.astype(int)
         cs["AreaKm2"] = (cs.geometry.area / 1_000_000).round(2)

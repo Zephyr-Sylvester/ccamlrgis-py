@@ -1,8 +1,8 @@
 import geopandas as gpd
 import pandas as pd
+from conftest import assert_geom_equal
 
 from ccamlrgis import create_polys
-from conftest import assert_geom_equal
 
 
 def test_polydata_default_matches_r(fixtures):

@@ -3,6 +3,61 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (3) — GitHub Actions CI
+
+### Done
+
+- `.github/workflows/ci.yml`: `test` job on the design doc's full target
+  matrix (3.10-3.13 x ubuntu/macos/windows, `fail-fast: false`), running
+  the offline test suite only (`pytest -m "not network"` -- network tests
+  hit the live CCAMLR WFS and this repo's own GitHub Release, both
+  external, so they stay opt-in per design doc section 1.3's "must not
+  depend on the network" rule); `lint` job (`ruff check` + `ruff format
+  --check`); `typecheck` job (`mypy --strict`), **marked
+  `continue-on-error: true`** -- see below.
+- Verified the pip-wheel-only install path actually works before
+  committing to it for CI (no conda): built a clean venv, installed via
+  `pip install -e ".[dev,plot,progress]"`, ran the full offline suite on
+  Python 3.13/macOS -- all 79 tests passed using PyPI wheels alone
+  (geopandas 1.1.4, rasterio 1.5.0, shapely 2.1.2), no GDAL-linkage issues.
+  (Chased down one red herring during this: a local shell had conda's
+  `PROJ_DATA`/`GDAL_DATA` env vars leaking in from `conda init`, which
+  broke the pip-wheel rasterio's CRS reading when both were active
+  simultaneously -- a shell artifact, not a real bug; GitHub Actions
+  runners start clean.)
+- Added `[tool.ruff]` config to `pyproject.toml` (`line-length = 120`,
+  matching this codebase's fairly long descriptive lines, plus a `select`
+  list including import-sorting and simplification rules) and ran `ruff
+  format`/`ruff check --fix` across the whole codebase for the first time
+  -- 21 lint findings and 33 files needing reformatting, all fixed
+  (mechanical: import sorting, line wrapping, a few genuine simplifications
+  like `itertools.pairwise` and `dict.get` instead of `if`/`else`).
+- **Ran `mypy --strict` and found ~212 errors** -- almost all "missing
+  type annotation," since the codebase (all ~3000 lines, all 41 ported
+  functions) predates any type hints. Rather than either (a) silently
+  block CI on a large surprise task the user didn't ask for, or (b) quietly
+  drop mypy from CI to dodge the problem, made the typecheck job
+  non-blocking (`continue-on-error: true`) so it runs and stays visible in
+  every CI run without gating merges. Full strict-mypy compliance (the
+  design doc's own G5 release-gate item) is real, separate follow-up work.
+- **79/79 offline tests, lint, and format all verified green** before
+  pushing (via the local pip-venv sanity check above, standing in for
+  actual GitHub Actions runs until the workflow's first real execution
+  confirms the matrix -- checked after pushing, see below).
+
+### Next
+
+1. Check the first real CI run once pushed -- watch for any
+   platform/Python-version cell that fails on wheel availability
+   specifically (Windows and 3.13 are the likeliest candidates per the
+   design doc's own environment.yml reasoning) and adjust the matrix if so.
+2. `mypy --strict` compliance (drop `continue-on-error` once done).
+3. `ccamlrgis.validate.check_geospatial_rules` (§2) -- not started.
+4. The four notebooks, a full runnable-tutorial `README.md`, `NOTICE`
+   file -- the rest of the G5 release gate.
+5. The Building-Polygons end-to-end notebook test (§6) -- fixtures have
+   existed since G0, test itself not yet written.
+
 ## 2026-07-30 (2) — datasets.py + the §4 data-publishing pipeline
 
 ### Done

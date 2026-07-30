@@ -21,9 +21,7 @@ def test_clip_to_coast_matches_r(fixtures):
     # Buffered_and_clipped_AreaKm2 gets added here (matches R's own
     # column-presence check in Clip2Coast.R).
     assert "Clipped_AreaKm2" not in expected.columns
-    np.testing.assert_allclose(
-        out["Buffered_and_clipped_AreaKm2"], expected["Buffered_and_clipped_AreaKm2"], atol=0.1
-    )
+    np.testing.assert_allclose(out["Buffered_and_clipped_AreaKm2"], expected["Buffered_and_clipped_AreaKm2"], atol=0.1)
 
     sym_diff_area = out.geometry.symmetric_difference(expected.geometry).area
     np.testing.assert_allclose(sym_diff_area, 0, atol=1e-9 * out.geometry.area.sum())

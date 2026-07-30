@@ -134,21 +134,31 @@ def _rgba_ramp(colours, alphas, n):
     with alpha=TRUE, fed opacities of 1-Atrans.
     """
     stops = [(*(c / 255 for c in _to_rgb(col)), 1 - a) for col, a in zip(colours, alphas)]
-    if n <= 1:
-        positions = [0.0]
-    else:
-        positions = [i / (n - 1) for i in range(n)]
+    positions = [0.0] if n <= 1 else [i / (n - 1) for i in range(n)]
     seg = len(stops) - 1
     out = []
     for p in positions:
         t = p * seg
         i = min(int(t), seg - 1) if seg > 0 else 0
         frac = t - i if seg > 0 else 0.0
-        out.append(tuple(stops[i][k] + (stops[i + 1][k] - stops[i][k]) * frac if seg > 0 else stops[0][k] for k in range(4)))
+        out.append(
+            tuple(stops[i][k] + (stops[i + 1][k] - stops[i][k]) * frac if seg > 0 else stops[0][k] for k in range(4))
+        )
     return out
 
 
-def create_arrow(input, n_points=50, pwidth=5, hlength=15, hwidth=10, dlength=0, arrow_type="normal", colour="green", transparency=0, yx=False):
+def create_arrow(
+    input,
+    n_points=50,
+    pwidth=5,
+    hlength=15,
+    hwidth=10,
+    dlength=0,
+    arrow_type="normal",
+    colour="green",
+    transparency=0,
+    yx=False,
+):
     """Create a (possibly curved, possibly segmented/dashed) arrow.
     CCAMLRGIS R: create_Arrow.R. `input` has 2 or 3 columns: Lat, Lon (or Y,
     X if `yx=True`), and an optional integer weight (biases the Bezier
@@ -241,9 +251,26 @@ def create_arrow(input, n_points=50, pwidth=5, hlength=15, hwidth=10, dlength=0,
 
 
 def create_circular_arrow(
-    latc=-67, lonc=-30, lmaj=800, lmin=500, ang=140, n_points_ellipse=100, direction="cw",
-    n_arrows=1, spacing=0, start=0, n_points_arrow=50, pwidth=5, hlength=15, hwidth=10,
-    dlength=0, arrow_type="normal", colour="green", transparency=0, yx=False, input=None,
+    latc=-67,
+    lonc=-30,
+    lmaj=800,
+    lmin=500,
+    ang=140,
+    n_points_ellipse=100,
+    direction="cw",
+    n_arrows=1,
+    spacing=0,
+    start=0,
+    n_points_arrow=50,
+    pwidth=5,
+    hlength=15,
+    hwidth=10,
+    dlength=0,
+    arrow_type="normal",
+    colour="green",
+    transparency=0,
+    yx=False,
+    input=None,
 ):
     """One or more arrows along an elliptical (or custom, via `input`) path.
     Defaults trace a simplified Weddell Sea gyre. CCAMLRGIS R:
@@ -271,8 +298,16 @@ def create_circular_arrow(
 
     def _arrow(pts):
         return create_arrow(
-            pts[["Y", "X"]], yx=True, n_points=n_points_arrow, pwidth=pwidth, hlength=hlength,
-            hwidth=hwidth, dlength=dlength, arrow_type=arrow_type, colour=colour, transparency=transparency,
+            pts[["Y", "X"]],
+            yx=True,
+            n_points=n_points_arrow,
+            pwidth=pwidth,
+            hlength=hlength,
+            hwidth=hwidth,
+            dlength=dlength,
+            arrow_type=arrow_type,
+            colour=colour,
+            transparency=transparency,
         )
 
     arr = None

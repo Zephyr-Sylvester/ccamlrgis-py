@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-import rioxarray  # noqa: F401
+import rioxarray
 
 from ccamlrgis import create_polys, rotate_obj
 

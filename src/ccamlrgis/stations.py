@@ -17,7 +17,9 @@ def _stratum_polygon(arr, transform, top, bot):
     mask = np.isfinite(arr) & (arr >= top) & (arr <= bot)
     if not mask.any():
         return None
-    geoms = [shapely_shape(g) for g, _ in rasterio.features.shapes(mask.astype(np.uint8), mask=mask, transform=transform)]
+    geoms = [
+        shapely_shape(g) for g, _ in rasterio.features.shapes(mask.astype(np.uint8), mask=mask, transform=transform)
+    ]
     return unary_union(geoms)
 
 
@@ -52,10 +54,7 @@ def create_stations(poly, bathy, depths, n=None, n_auto=None, dist=None, buf=100
     strata = [s.intersection(poly_geom) if s is not None else None for s in strata]
 
     areas = np.array([s.area if s is not None else 0.0 for s in strata])
-    if n_auto is not None:
-        counts = np.round(areas / areas.max() * n_auto).astype(int)
-    else:
-        counts = np.asarray(n, dtype=int)
+    counts = np.round(areas / areas.max() * n_auto).astype(int) if n_auto is not None else np.asarray(n, dtype=int)
 
     valid = [s for s in strata if s is not None and not s.is_empty]
     if not valid:
@@ -106,7 +105,9 @@ def create_stations(poly, bathy, depths, n=None, n_auto=None, dist=None, buf=100
         kept["stratum"] = kept["stratum"].astype(int)
         for i in range(n_strata):
             if (kept["stratum"] == i).sum() < counts[i]:
-                raise ValueError("Cannot generate stations given the constraints. Reduce dist and/or number of stations and/or buf.")
+                raise ValueError(
+                    "Cannot generate stations given the constraints. Reduce dist and/or number of stations and/or buf."
+                )
         picked = []
         for i in range(n_strata):
             sub = kept[kept["stratum"] == i]

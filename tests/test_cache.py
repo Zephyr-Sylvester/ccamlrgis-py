@@ -23,7 +23,9 @@ def test_fetch_writes_manifest_and_is_idempotent(tmp_path, monkeypatch):
 
     class FakeResponse:
         status_code = 200
-        headers = {"ETag": '"abc123"', "Last-Modified": "Wed, 01 Jan 2026 00:00:00 GMT"}
+
+        def __init__(self):
+            self.headers = {"ETag": '"abc123"', "Last-Modified": "Wed, 01 Jan 2026 00:00:00 GMT"}
 
         def raise_for_status(self):
             pass

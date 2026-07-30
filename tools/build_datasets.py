@@ -58,10 +58,7 @@ def build(output_dir, r_source_dir, r_env="ccamlrgis-r"):
         print(f"wrote {out_path.name} ({df.shape[0]} rows)")
 
     coast_path = output_dir / "Coast.gpkg"
-    r_script = (
-        f'library(CCAMLRGIS); '
-        f'sf::st_write(Coast, "{coast_path}", quiet=TRUE, append=FALSE, delete_dsn=TRUE)'
-    )
+    r_script = f'library(CCAMLRGIS); sf::st_write(Coast, "{coast_path}", quiet=TRUE, append=FALSE, delete_dsn=TRUE)'
     subprocess.run(["conda", "run", "-n", r_env, "Rscript", "-e", r_script], check=True)
     _record(manifest, coast_path)
     print(f"wrote {coast_path.name} (R fallback: rdata can't reconstruct sf geometry/CRS)")
@@ -82,7 +79,11 @@ def build(output_dir, r_source_dir, r_env="ccamlrgis-r"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", default=REPO_ROOT / "data_artifacts")
-    parser.add_argument("--r-source-dir", default=DEFAULT_R_SOURCE_DIR, help="Path to the CCAMLRGIS R package checkout (contains data/ and inst/extdata/)")
+    parser.add_argument(
+        "--r-source-dir",
+        default=DEFAULT_R_SOURCE_DIR,
+        help="Path to the CCAMLRGIS R package checkout (contains data/ and inst/extdata/)",
+    )
     parser.add_argument("--r-env", default="ccamlrgis-r", help="Conda env name with CCAMLRGIS installed")
     args = parser.parse_args()
     build(Path(args.output_dir), Path(args.r_source_dir), args.r_env)

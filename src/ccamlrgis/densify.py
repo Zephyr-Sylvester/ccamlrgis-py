@@ -30,14 +30,9 @@ def densify_data(lon, lat, dlon=0.1, dlat=0.1):
         alpha = abs(((lon2 - lon1 + 180) % 360) - 180)
         if alpha == 180:
             warnings.warn(
-                "A line is exactly 180 degrees wide in longitude\n"
-                "Please add an intermediate point in the line\n"
+                "A line is exactly 180 degrees wide in longitude\nPlease add an intermediate point in the line\n"
             )
-        crosses = (
-            (abs(lon1) >= 90 or abs(lon2) >= 90)
-            and (np.sign(lon1) != np.sign(lon2))
-            and alpha < 180
-        )
+        crosses = (abs(lon1) >= 90 or abs(lon2) >= 90) and (np.sign(lon1) != np.sign(lon2)) and alpha < 180
         if crosses:
             if lon1 < lon2:  # ccw
                 seg = LineString([(lon1 + 360, lat1), (lon2, lat2)])
