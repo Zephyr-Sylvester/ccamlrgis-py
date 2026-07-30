@@ -3,6 +3,59 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-29 (5) — Phase 3: get_depths, seabed_area, get_c_intersection, get_iso_polys, rotate_obj
+
+### Done
+
+- `load_bathy` (load.py) now returns an `xarray.DataArray` with the `.rio`
+  accessor via `rioxarray.open_rasterio()`, not a raw `rasterio` handle --
+  fixes a deviation from the design doc's own §3 (rasters should be
+  xarray) that had crept in during Phase 1 before Phase 3 needed a real
+  raster representation to build on. Added `rioxarray`/`xarray` to
+  `pyproject.toml` (already in `environment.yml`).
+- `rotate_obj`, `get_c_intersection`, `get_depths`, `seabed_area`,
+  `get_iso_polys` all implemented in `analysis.py`, validated against G3
+  fixtures generated the same way as G0-G2. Since `small_bathy()`/the
+  cache-backed bundled-data pipeline (§4) still doesn't exist, sourced a
+  local test-only copy of R's bundled `SmallBathy.tif` directly (same
+  pattern as `coast_all.gpkg` for `clip_to_coast` earlier) -- this is a
+  `tests/fixtures/` file, not shipped in the package.
+- **41/41 tests pass** (32 offline + 9 network).
+- Found and fixed a real bug empirically: `seabed_area`'s and
+  `get_iso_polys`'s raster clipping needed `all_touched=True` and `=False`
+  respectively to match R's `terra::mask()` -- confirmed by testing both
+  settings against real R output for each function rather than assuming
+  rioxarray's default matches. `all_touched=False` (rioxarray's default)
+  alone was undercounting `seabed_area` by several percent on every
+  non-trivial stratum.
+- Two new deviations logged (`porting_notes.md` 11-12): `seabed_area` has
+  a small (~1-2%) residual on the deepest/open-ended depth stratum, likely
+  GDAL-vs-terra sub-pixel tie-breaking; `get_iso_polys` uses blocky
+  raster-cell-edge polygons (`rasterio.features.shapes` on a classified
+  array) instead of R's `isoband`-smooth interpolated contours -- total
+  area matches closely (0.3% in testing) but individual thin/edge bands
+  can diverge up to ~25%. A follow-up could switch to `contourpy` (which
+  matplotlib itself now uses internally, no plotting backend required) for
+  closer fidelity; not done this round to avoid a new dependency.
+
+### Scope not covered this round (by design)
+
+- `create_stations` -- the last Phase 3 function, deliberately deferred.
+  It's stochastic (needs its own `rng=`/`seed=` design) and the design
+  doc's own G3 gate calls for *distributional* validation (1,000 seeds,
+  KS test against R's own distribution over many runs), which is a
+  meaningfully different and larger validation task than the
+  fixture-equality approach used for everything else so far -- better
+  scoped as its own round than rushed alongside five other functions.
+
+### Next
+
+1. `create_stations`, with its distributional validation harness.
+2. GitHub Actions CI.
+3. `datasets.py` + §4 data-publishing pipeline.
+4. Phase 4: shapes and pies (`create_pies`, `create_arrow`,
+   `create_circular_arrow`, `create_ellipse`, `create_hashes`).
+
 ## 2026-07-29 (4) — Phase 2: create_polys/_lines/_points/_polygrids, add_colour, assign_areas
 
 ### Done

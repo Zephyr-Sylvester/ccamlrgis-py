@@ -235,7 +235,7 @@ for (nm in names(wfs_layers)) {
     bbox = as.list(bbox)
   )
   out_path <- sprintf("tests/fixtures/load_layers/%s.json", nm)
-  jsonlite::write_json(summary_obj, out_path, auto_unbox = TRUE, pretty = TRUE)
+  jsonlite::write_json(summary_obj, out_path, auto_unbox = TRUE, pretty = TRUE, digits = 15)
   record(out_path)
   cat(sprintf("  %d features, %d columns, geometry=%s\n", nrow(d), ncol(d) - 1, summary_obj$geometry_type[1]))
 }
@@ -331,6 +331,59 @@ cat(sprintf(
   "Phase 2: create_polys(%d,%d rows), create_lines(%d), create_points(%d), grids(%d,%d), assign_areas(%d)\n",
   nrow(polys_default), nrow(polys_bp), nrow(lines_default), nrow(points_default),
   nrow(grid_degree), nrow(grid_equalarea), nrow(assigned)
+))
+
+# ---------------------------------------------------------------------------
+# 7. Phase 3 (G3): get_depths, seabed_area, get_C_intersection, get_iso_polys
+#    (Rotate_obj and create_Stations are not fixture-tested this round: the
+#    former only re-defines a CRS -- no bit-for-bit R output needed to
+#    validate that -- and the latter is stochastic and deferred to its own
+#    round with distributional validation, per PYTHON_PORT_PROMPT.md's own
+#    G3 gate design.)
+# ---------------------------------------------------------------------------
+dir.create("tests/fixtures/get_depths", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/seabed_area", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/get_c_intersection", showWarnings = FALSE, recursive = TRUE)
+dir.create("tests/fixtures/get_iso_polys", showWarnings = FALSE, recursive = TRUE)
+
+# get_depths
+depths_input <- data.frame(Lat = PointData$Lat, Lon = PointData$Lon, Catch = PointData$Catch)
+depths_out <- get_depths(Input = depths_input, Bathy = SmallBathy())
+write.csv(depths_out, "tests/fixtures/get_depths/pointdata_depths.csv", row.names = FALSE)
+record("tests/fixtures/get_depths/pointdata_depths.csv")
+
+# seabed_area
+seabed_polys <- create_Polys(PolyData, Densify = TRUE)
+seabed_out <- seabed_area(SmallBathy(), seabed_polys, PolyNames = "ID", depth_classes = c(0, -200, -600, -1800, -3000, -5000))
+write.csv(seabed_out, "tests/fixtures/seabed_area/polydata_strata.csv", row.names = FALSE)
+record("tests/fixtures/seabed_area/polydata_strata.csv")
+
+# get_C_intersection: the 4 non-degenerate docstring examples (the 5th is
+# the parallel-lines error case, not a fixture)
+gci_cases <- list(
+  beyond_range = list(Line1 = c(-30, -55, -29, -50), Line2 = c(-50, -60, -40, -60)),
+  on_segment = list(Line1 = c(-30, -65, -29, -50), Line2 = c(-50, -60, -40, -60)),
+  crossed = list(Line1 = c(-30, -65, -29, -50), Line2 = c(-50, -60, -25, -60)),
+  antimeridian = list(Line1 = c(-179, -60, -150, -50), Line2 = c(-120, -60, -130, -62))
+)
+gci_results <- list()
+for (nm in names(gci_cases)) {
+  cs <- gci_cases[[nm]]
+  res <- suppressWarnings(get_C_intersection(Line1 = cs$Line1, Line2 = cs$Line2, Plot = FALSE))
+  gci_results[[nm]] <- list(Lon = unname(res["Lon"]), Lat = unname(res["Lat"]))
+}
+jsonlite::write_json(gci_results, "tests/fixtures/get_c_intersection/cases.json", auto_unbox = TRUE, pretty = TRUE, digits = 15)
+record("tests/fixtures/get_c_intersection/cases.json")
+
+# get_iso_polys (docstring example)
+iso_poly <- create_Polys(Input = data.frame(ID = 1, Lat = c(-55, -55, -61, -61), Lon = c(-30, -25, -25, -30)))
+iso_polys <- get_iso_polys(Rast = SmallBathy(), Poly = iso_poly, Cuts = seq(-8000, 0, length.out = 10))
+st_write(iso_polys, "tests/fixtures/get_iso_polys/smallbathy_example.gpkg", quiet = TRUE, append = FALSE, delete_dsn = TRUE)
+record("tests/fixtures/get_iso_polys/smallbathy_example.gpkg")
+
+cat(sprintf(
+  "Phase 3: get_depths(%d), seabed_area(%d), get_C_intersection(%d cases), get_iso_polys(%d polys)\n",
+  nrow(depths_out), nrow(seabed_out), length(gci_results), nrow(iso_polys)
 ))
 
 # ---------------------------------------------------------------------------

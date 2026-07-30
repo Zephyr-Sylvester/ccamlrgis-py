@@ -4,7 +4,7 @@ http://, which now returns 403 Forbidden from CCAMLR's server (confirmed
 """
 
 import geopandas as gpd
-import rasterio
+import rioxarray  # noqa: F401 -- registers the .rio accessor on xarray.DataArray
 
 from . import cache
 from .crs import CCAMLR_CRS
@@ -69,9 +69,13 @@ def load_bathy(res=5000, path=None, force_refresh=False):
     CCAMLRGIS R: load_Bathy (``LocalFile=FALSE`` -> always cache-backed here;
     there is no local-file passthrough mode in the port -- pass ``path=`` to
     point the cache itself at an existing directory instead).
+
+    Returns an ``xarray.DataArray`` with the ``.rio`` accessor (design doc
+    section 3: rasters are xarray, not raw rasterio handles), single-band
+    bathymetry squeezed to 2D (y, x).
     """
     if res not in _VALID_BATHY_RES:
         raise ValueError(f"'res' should be one of {_VALID_BATHY_RES}")
     url = _BATHY_URL.format(res=res)
     local_path = cache.fetch(url, name=f"GEBCO2024_{res}.tif", path=path, force_refresh=force_refresh, timeout=3600)
-    return rasterio.open(local_path)
+    return rioxarray.open_rasterio(local_path).squeeze("band", drop=True)

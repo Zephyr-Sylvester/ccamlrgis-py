@@ -3,6 +3,7 @@ import warnings
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import xarray as xr
 from pyproj import Transformer
 
 from .crs import CCAMLR_CRS, WGS84
@@ -174,3 +175,182 @@ def assign_areas(input, polys, area_name_format="GAR_Long_Label", buffer=0, name
 
     merged = df.merge(assigned.rename(columns={"Lat": lat_col, "Lon": lon_col}), on=[lat_col, lon_col], how="left")
     return merged
+
+
+def rotate_obj(input, lon0=None):
+    """Rotate a vector or raster object by re-defining its projection so
+    that ``lon0`` points up. For plotting only, not analysis -- distances
+    and areas computed after rotation are not meaningful. CCAMLRGIS R:
+    Rotate_obj.R.
+    """
+    if lon0 is None:
+        raise ValueError("'lon0' must be numeric.")
+    crs_to = f"+proj=laea +lat_0=-90 +lon_0={lon0} +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+    if isinstance(input, (gpd.GeoDataFrame, gpd.GeoSeries)):
+        return input.to_crs(crs_to)
+    if hasattr(input, "rio"):
+        return input.rio.reproject(crs_to)
+    raise TypeError("'input' must be a GeoDataFrame/GeoSeries or an xarray.DataArray raster (with a .rio accessor).")
+
+
+def get_c_intersection(line1, line2):
+    """Cartesian (planar, not geodesic) intersection of two lines each
+    given as ``[lon_start, lat_start, lon_end, lat_end]``. CCAMLRGIS R:
+    get_C_intersection.R (formula:
+    https://en.wikipedia.org/wiki/Line-line_intersection).
+
+    Deviation: ``Plot=`` is dropped -- Python never draws as a side effect
+    (design doc section 1.2); use a separate plot helper if a diagram of
+    the intersection is wanted.
+    """
+    x1, y1, x2, y2 = line1
+    x3, y3, x4, y4 = line2
+    d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    if d == 0:
+        raise ValueError("Parallel lines.")
+    px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d
+    py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d
+    if abs(px) > 180:
+        warnings.warn(
+            "Antimeridian crossed. Find where your line crosses it first, "
+            "using line=[180,-90,180,0] or line=[-180,-90,-180,0]."
+        )
+    return {"Lon": px, "Lat": py}
+
+
+def get_depths(input, bathy, names_in=None):
+    """Sample a bathymetry raster's depth at point locations (nearest-cell
+    value, no interpolation -- matches terra::extract's default). CCAMLRGIS
+    R: get_depths.R.
+    """
+    df = pd.DataFrame(input).copy()
+    if names_in is None:
+        names_in = list(df.columns[:2])
+    elif len(names_in) != 2:
+        raise ValueError("'names_in' should be a sequence of length 2")
+    elif any(n not in df.columns for n in names_in):
+        raise ValueError("'names_in' do not match column names in 'input'")
+
+    xy = project_data(df, names_in=names_in, append=False)
+    x = xr.DataArray(xy["X"].to_numpy(), dims="points")
+    y = xr.DataArray(xy["Y"].to_numpy(), dims="points")
+    depths = bathy.sel(x=x, y=y, method="nearest").to_numpy()
+
+    out = df.copy()
+    out["d"] = depths
+    return out
+
+
+def seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800)):
+    """Planimetric seabed area within polygons and depth strata, in km2.
+    CCAMLRGIS R: seabed_area.R.
+    """
+    if poly_names is None:
+        raise ValueError("'poly_names' is missing")
+    if poly_names not in poly.columns:
+        raise ValueError("'poly_names' does not match column names in 'poly'")
+
+    px_w, px_h = bathy.rio.resolution()
+    pixel_area_km2 = abs(px_w * px_h) / 1_000_000
+
+    pairs = list(zip(depth_classes[:-1], depth_classes[1:]))
+    col_names = [f"{a}|{b}" for a, b in pairs]
+
+    rows = []
+    for _, row in poly.iterrows():
+        # all_touched=True matches terra::mask()'s default (any overlap
+        # counts, not just cell-centre-in-polygon) -- confirmed against the
+        # G3 fixture: all_touched=False undercounted every non-trivial
+        # stratum (e.g. 189 vs R's 196 cells on the "one" polygon's
+        # -200|-600 stratum).
+        clipped = bathy.rio.clip([row.geometry], poly.crs, drop=True, invert=False, all_touched=True)
+        arr = clipped.to_numpy()
+        result = {poly_names: str(row[poly_names])}
+        for (dtop, dbot), name in zip(pairs, col_names):
+            # terra::classify's two-step masking keeps the OPEN interval
+            # (dbot, dtop) -- strictly between the strata bounds.
+            in_range = (arr > dbot) & (arr < dtop)
+            result[name] = round(float(np.count_nonzero(in_range)) * pixel_area_km2, 2)
+        rows.append(result)
+
+    out = pd.DataFrame(rows)
+    if "-600|-1800" in out.columns:
+        out = out.rename(columns={"-600|-1800": "Fishable_area"})
+    return out
+
+
+def get_iso_polys(rast, poly=None, cuts=None, cols=("green", "yellow", "red"), grp=False, strict=True):
+    """Turn a raster into filled contour-band polygons between `cuts`.
+    CCAMLRGIS R: get_iso_polys.R.
+
+    Deviation: R uses the `isoband` package, which linearly interpolates
+    band boundaries between cell centres (smooth contours). This port uses
+    `rasterio.features.shapes` on a classified array instead (design doc's
+    other suggested option) -- boundaries follow raster cell edges (blocky)
+    rather than being interpolated. No new dependency, and area per band
+    should still closely match R's at typical bathymetry resolutions; see
+    porting_notes.md for the fixture-validated area comparison.
+    """
+    import rasterio.features
+    from shapely.geometry import shape as shapely_shape
+
+    if poly is not None:
+        geom = poly.geometry.union_all() if hasattr(poly, "geometry") else poly.union_all()
+        # Unlike seabed_area's per-stratum masking (all_touched=True matches
+        # terra::mask() there), the initial Poly clip here matches R almost
+        # exactly with all_touched=False (0.01% total-area difference vs
+        # ~6.7% with True) -- confirmed against the G3 fixture. The two
+        # functions' clip calls aren't equivalent enough to share one rule;
+        # each was calibrated against its own fixture.
+        rast = rast.rio.clip([geom], poly.crs, drop=True, all_touched=False)
+
+    cuts_full = np.concatenate([[-np.inf], np.sort(np.asarray(cuts, dtype=float)), [np.inf]])
+    lo, hi = cuts_full[:-1], cuts_full[1:]
+
+    arr = rast.to_numpy()
+    valid = np.isfinite(arr)
+    band_idx = np.digitize(arr, cuts_full[1:-1], right=False)  # right=False: bins are [lo, hi)
+
+    transform = rast.rio.transform()
+    records = []
+    for i in range(len(lo)):
+        mask = valid & (band_idx == i)
+        if not mask.any():
+            continue
+        for geom_json, _ in rasterio.features.shapes(mask.astype(np.uint8), mask=mask, transform=transform):
+            records.append({"Min": lo[i], "Max": hi[i], "geometry": shapely_shape(geom_json)})
+
+    cs = gpd.GeoDataFrame(records, crs=rast.rio.crs)
+    if strict:
+        cs = cs[np.isfinite(cs["Min"]) & np.isfinite(cs["Max"])].reset_index(drop=True)
+
+    iso_map = {m: i + 1 for i, m in enumerate(sorted(cs["Min"].unique()))}
+    cs["Iso"] = cs["Min"].map(iso_map)
+    from .colours import add_colour
+
+    cs["c"] = add_colour(cs["Iso"].to_numpy(), cuts=100, cols=cols)["varcol"]
+    cs["ID"] = np.arange(1, len(cs) + 1)
+
+    if grp:
+        cs = cs.reset_index(drop=True)
+        touches = [cs.geometry.iloc[i:].index[cs.geometry.iloc[i:].touches(cs.geometry.iloc[i])].tolist() for i in range(len(cs))]
+        group = np.full(len(cs), np.nan)
+        group[0] = 1
+        for i in range(1, len(cs)):
+            neighbours = [j for j in touches[i] if j != i]
+            if not neighbours:
+                group[i] = group[i - 1] + 1
+            elif np.isnan(group[i]):
+                idx = [i] + neighbours
+                group[np.array(idx)] = group[i - 1] + 1
+        cs["Grp"] = group.astype(int)
+        cs["AreaKm2"] = (cs.geometry.area / 1_000_000).round(2)
+        centroids = cs.geometry.centroid
+        cs["Labx"] = centroids.x
+        cs["Laby"] = centroids.y
+        # keep the label only on the deepest (max Iso) polygon per group
+        keep = cs.groupby("Grp")["Iso"].transform("max") == cs["Iso"]
+        cs.loc[~keep, ["Labx", "Laby"]] = np.nan
+        cs["ID"] = np.arange(1, len(cs) + 1)
+
+    return cs.reset_index(drop=True)

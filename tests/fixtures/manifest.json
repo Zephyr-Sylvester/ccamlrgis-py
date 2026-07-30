@@ -85,48 +85,48 @@
       "bytes": 747
     },
     "tests/fixtures/clip_to_coast/input.gpkg": {
-      "sha256": "453ec83b5de237ecda852efc865c5aa81bb688242b911af3943949c0add86ecf",
+      "sha256": "09f508f9f0d3bca4b4235012bdec82e1f2265313064c2bb88eac8943be06f502",
       "bytes": 122880
     },
     "tests/fixtures/clip_to_coast/output.gpkg": {
-      "sha256": "33a3308de5543bea3b2948fe30744e66d4ca5b710b40eba49b5b663472a2c1ef",
+      "sha256": "d92155458b0f852be70861f020bd75a4fc647d73b96210d855ab8942978a022c",
       "bytes": 131072
     },
     "tests/fixtures/clip_to_coast/coast_all.gpkg": {
-      "sha256": "292fb863dca49461ccda0a67a91a0c3870fff30fda63b2bdce6f394824ff494d",
+      "sha256": "fc9987636ba3f2b2efd058c5bd04ba379b89a74ba3bfdb6fc1f2fac7d323c165",
       "bytes": 1028096
     },
     "tests/fixtures/load_layers/asds.json": {
-      "sha256": "2cac9da411860a9982805132ad67c035e30992ab4092f9b71376c14852a34b82",
-      "bytes": 498
+      "sha256": "bb38dd98920ec68731b1a3e91cfe06598b763d0ace311cbbbe223e8864ccbfc7",
+      "bytes": 523
     },
     "tests/fixtures/load_layers/ssrus.json": {
-      "sha256": "82069bf82de5a27f1aafc4c3e3f02839cd2a99d1fe8dcd1630cc44507caf99bc",
-      "bytes": 451
+      "sha256": "ae780442917bb8080f8f146b8fccdbf3c8543c4795ff8e6c0b14079c774223a7",
+      "bytes": 469
     },
     "tests/fixtures/load_layers/coastline.json": {
-      "sha256": "b20666498680a31408c0af9dd898dd1693e5d5d9ef5d30ecc848fd122328fae0",
-      "bytes": 310
+      "sha256": "bad21d6465813fe90e21f1070983238639c4231944b2bf3ff7b711aec1580925",
+      "bytes": 328
     },
     "tests/fixtures/load_layers/rbs.json": {
-      "sha256": "b70e9551b4bb501b3ec554e1230cf8b66bd289f1ea01f650177c9ecbf8869740",
-      "bytes": 477
+      "sha256": "b550cbf03b7b912805c14626c295ca4c9bf3a37c9488ffd9e91ddb86705bda04",
+      "bytes": 502
     },
     "tests/fixtures/load_layers/ssmus.json": {
-      "sha256": "d39d8484731fe7bdb6ce29bb4e30ac3f8a72ed0c3f03820264b1f59370dd6270",
-      "bytes": 449
+      "sha256": "28cb386ac083cc3e48193823858ea0a349c814341abb5fa5a16570586d6f3585",
+      "bytes": 475
     },
     "tests/fixtures/load_layers/mas.json": {
-      "sha256": "bdd293a8677af6212a0a5f8a7aefebfbdf101047879409d1363242ecdd72abd5",
-      "bytes": 465
+      "sha256": "c678e61d6e4ece4a0a88e4b7457aa08bf1ca440b63893d44f145913b8703043f",
+      "bytes": 484
     },
     "tests/fixtures/load_layers/mpas.json": {
-      "sha256": "a40c69b715f2c969ee6679b20ac242cadb6057815e8741a567fed692694dfc1d",
-      "bytes": 434
+      "sha256": "477b9416acf2d95c029fa3a0064e213c7a5dd5d7faa15a010572c3ee3297884b",
+      "bytes": 452
     },
     "tests/fixtures/load_layers/eezs.json": {
-      "sha256": "c68b0b22ded5ca5480ca8bd003efd7ce6d00557a920c59a6ffc39da1e436b602",
-      "bytes": 445
+      "sha256": "e7a8fd4808474e54787582bb6f9b92109d9010c0be75eb948aaf5a7a40e11da5",
+      "bytes": 470
     },
     "tests/fixtures/building_polygons/My_Polygons_Form.csv": {
       "sha256": "ff394d266efc027e4c7074a3fc3db4824b8b6bef32ed35ddbea1b2fe80f5e3fa",
@@ -153,27 +153,27 @@
       "bytes": 7000
     },
     "tests/fixtures/create_polys/polydata_default.gpkg": {
-      "sha256": "7282bd9d9a9f2841fdb5c2f0d2e33588bd847f456fc88a06fb9461a196a6d156",
+      "sha256": "bc2bf3143e05d360dba2620a7b2de10420889070d90a3cfe63be8f3319e00da5",
       "bytes": 114688
     },
     "tests/fixtures/create_polys/building_polygons.gpkg": {
-      "sha256": "a5d27e3257c60a2d91b4c2cc7ac15afca75d14302b405dbebc5287c09894de53",
+      "sha256": "1214ae74654e9ac4cd8a5cca8417d0a0190936778effe69ec66dcc7c2c420a10",
       "bytes": 110592
     },
     "tests/fixtures/create_lines/linedata_densify.gpkg": {
-      "sha256": "3f1f62686d96fb9b32e9a793fef2cd0ea296700d4c81e53ca12f7908281b4870",
+      "sha256": "2ef57cc105bc9f07d224434a68fe95632df646042cf2ddb58312a6e6403e2e37",
       "bytes": 118784
     },
     "tests/fixtures/create_points/pointdata.gpkg": {
-      "sha256": "8b5b71289c9dd4f49731532e9cb3a80fa49559ce4c4cfd3cc492ec23f336f2a9",
+      "sha256": "86bdb7826599e628e040ac6b43e762494c1965377b4cb7680f9e7962169dc7ad",
       "bytes": 98304
     },
     "tests/fixtures/create_polygrids/griddata_degree.gpkg": {
-      "sha256": "99c401fe03f6ef389e714a22e6963161d9895ea405fe4f288f19b800cd90d087",
+      "sha256": "0bfbf132cf84239b879cdb3e5c4e74e38154ab96f1495085a3417e040a06c70c",
       "bytes": 196608
     },
     "tests/fixtures/create_polygrids/griddata_equalarea.gpkg": {
-      "sha256": "12573106f3b92978478ae1df6be84de8ea21bb8cc6914e5a2d84eaf47fa1b589",
+      "sha256": "bb850d196cd2fabdca9288b708ee355e0883fed5dcaaa514ea95f853da84ad9a",
       "bytes": 204800
     },
     "tests/fixtures/add_col/pointdata_nfishes_varcol.csv": {
@@ -191,6 +191,22 @@
     "tests/fixtures/assign_areas/fixed_points.csv": {
       "sha256": "915e681b92b79817d4a70d263c9f81d4d7bfeb2ac9d2f0c2c0d979242c1d69eb",
       "bytes": 265
+    },
+    "tests/fixtures/get_depths/pointdata_depths.csv": {
+      "sha256": "6432afff802ac7e1858c3ec9744017d6f4874e62438bc6dff07cb5726aa44683",
+      "bytes": 723
+    },
+    "tests/fixtures/seabed_area/polydata_strata.csv": {
+      "sha256": "aadc3617c0fabc5d8e25da44ca48e49bad6c1a80e87d4db3bd806acfefb0a81b",
+      "bytes": 187
+    },
+    "tests/fixtures/get_c_intersection/cases.json": {
+      "sha256": "6a4b10517191a1215bf8a6b9def0cc1986d4d360efb50f24192cf228740a66cc",
+      "bytes": 284
+    },
+    "tests/fixtures/get_iso_polys/smallbathy_example.gpkg": {
+      "sha256": "6abecb8d8ea7505c85e5e0f6764f34157b13c12227bf66ebe542b20d0cf1e666",
+      "bytes": 172032
     }
   }
 }

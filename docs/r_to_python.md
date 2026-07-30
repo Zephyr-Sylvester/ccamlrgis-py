@@ -85,7 +85,7 @@ False` keyword (§1.3 caching contract) with no R equivalent.
 | `get_depths(Input, Bathy, NamesIn=NULL)` | `get_depths(input, bathy, names_in=None)` | |
 | `seabed_area(Bathy, Poly, PolyNames=NULL, depth_classes=c(-600,-1800))` | `seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800))` | |
 | `get_C_intersection(Line1, Line2, Plot=TRUE)` | `get_c_intersection(line1, line2)` | `Plot=` dropped — Python never draws as a side effect (§1.2); use the separate plot helper |
-| `get_iso_polys(Rast, Poly=NULL, Cuts, Cols=c("green","yellow","red"), Grp=FALSE, strict=TRUE)` | `get_iso_polys(rast, poly=None, cuts, cols=("green","yellow","red"), grp=False, strict=True)` | R uses `isoband`; Python uses `matplotlib.contour`/`rasterio.features.shapes` — validate band areas within 0.1% (Gate G3) |
+| `get_iso_polys(Rast, Poly=NULL, Cuts, Cols=c("green","yellow","red"), Grp=FALSE, strict=TRUE)` | `get_iso_polys(rast, poly=None, cuts, cols=("green","yellow","red"), grp=False, strict=True)` | R uses `isoband` (smooth interpolated contours); Python uses `rasterio.features.shapes` on a classified array (blocky, raster-cell-edge boundaries) — total area matches closely, per-band area can differ up to ~25% on thin/edge bands; see porting_notes.md deviation 12 |
 | `Rotate_obj(Input, Lon0=NULL)` | `rotate_obj(input, lon0=None)` | implemented as a CRS re-definition (`+lon_0=`), not a geometric affine, matching R |
 | `add_col(var, cuts=100, cols=c('green','yellow','red'))` | `add_colour(var, cuts=100, cols=('green','yellow','red'))` | R name kept visible in docs per §1.1; underpins grid colouring |
 

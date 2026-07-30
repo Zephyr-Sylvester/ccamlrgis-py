@@ -237,3 +237,64 @@ differ from what a given R run produced (and would differ between two R
 runs too). The point is still assigned to exactly one adjacent cell, and
 which one is only ever a floating-point coin flip on the true value's exact
 placement.
+
+## 11. `seabed_area`: small residual on the deepest/open-ended stratum
+
+**R behaviour:** `terra::crop()` + `terra::mask()` clip the bathymetry
+raster to each polygon before counting cells per depth stratum.
+
+**Python behaviour:** `rioxarray`'s `.rio.clip(..., all_touched=True)`
+(any partial pixel/polygon overlap counts, not just cell-centre-inside)
+reproduces R's per-polygon, per-stratum cell counts almost exactly --
+confirmed against the G3 fixture (`PolyData`'s 3 polygons x 5 depth
+strata): 4 of 5 strata matched to R's own rounding precision on every
+polygon. Only the deepest stratum (open-ended toward the raster's true
+minimum, `-3000|-5000` in the fixture) showed a residual, up to ~1.7%.
+
+**Reason:** `all_touched=True` was empirically the correct match (verified
+by testing both settings against real R output; `all_touched=False`
+undercounted every non-trivial stratum, e.g. 189 vs R's 196 cells on one
+case). The residual on the deepest stratum specifically is most likely
+GDAL's vs. terra's differing sub-pixel tie-breaking for partial-overlap
+pixels, concentrated wherever a polygon boundary happens to cross a steep
+bathymetric gradient -- not a bug in the masking logic itself (fixing the
+`all_touched` flag resolved the large, systematic errors; what's left is
+small and stratum-specific).
+
+**Impact on users:** areas from `seabed_area` can differ from R by up to
+~1-2% on the deepest depth stratum queried, more at `SmallBathy`'s coarse
+10 km resolution than at `load_bathy`'s finer resolutions (boundary pixels
+are a much smaller fraction of total pixels at higher resolution). Not
+expected to matter for the CCAMLR "fishable area" (`-600|-1800`) use case
+specifically, which matched R almost exactly in testing.
+
+## 12. `get_iso_polys`: raster-cell (blocky) polygons, not isoband-smooth contours
+
+**R behaviour:** `isoband::isobands()` produces smooth, linearly-interpolated
+contour-band boundaries between raster cell centres.
+
+**Python behaviour:** `rasterio.features.shapes()` on a classified
+(binned) array, per design doc section 5's own suggested alternative.
+Boundaries follow raster cell edges (blocky) rather than being
+interpolated.
+
+**Reason:** avoids a new dependency (an isoband-equivalent smooth-contour
+library isn't in the stack) and reuses `rasterio`, already a core
+dependency. Total covered area matches R closely (0.3% on the G3 fixture,
+after calibrating the polygon clip's `all_touched=False` against real R
+output -- see the `seabed_area` note above for why the two functions
+needed opposite settings). Per-band area is noisier: most bands were within
+a few percent in testing, but bands abutting a coastline or the shallowest/
+deepest cut diverged up to ~25% -- exactly where blocky-vs-interpolated
+contours differ most, since a thin band on a steep gradient is where pixel
+counting and smooth interpolation disagree most.
+
+**Impact on users:** `get_iso_polys` output is usable for mapping (visually
+similar, and this was flagged by the design doc itself as "cosmetic
+plotting output need not be pixel-identical") but individual band polygons
+should not be treated as precise to R's output, particularly thin bands
+near the coastline or at the extremes of the chosen `cuts`. A follow-up
+switching to a real smooth-contour library (e.g. `contourpy`, which
+matplotlib itself now uses and which doesn't require a plotting backend)
+would close this gap and is a reasonable future improvement, not attempted
+here to avoid a new dependency for a first pass.

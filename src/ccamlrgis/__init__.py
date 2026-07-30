@@ -1,4 +1,13 @@
-from .analysis import assign_areas, clip_to_coast, project_data
+from .analysis import (
+    assign_areas,
+    clip_to_coast,
+    get_c_intersection,
+    get_depths,
+    get_iso_polys,
+    project_data,
+    rotate_obj,
+    seabed_area,
+)
 from .colours import add_colour
 from .create import create_lines, create_points, create_polygrids, create_polys
 from .crs import CCAMLR_CRS, WGS84
@@ -29,6 +38,11 @@ __all__ = [
     "create_lines",
     "create_points",
     "create_polygrids",
+    "get_depths",
+    "seabed_area",
+    "get_c_intersection",
+    "get_iso_polys",
+    "rotate_obj",
     "load_asds",
     "load_ssrus",
     "load_coastline",
