@@ -3,6 +3,50 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-29 (2) — Phase 1 implementation: project_data, densify_data
+
+### Done
+
+- `pyproject.toml` (hatchling, src layout) and minimal `README.md`.
+- `src/ccamlrgis/`: `crs.py` (`CCAMLR_CRS`/`WGS84` constants), `analysis.py`
+  (`project_data`), `densify.py` (`densify_data`). Both ported functions
+  pass their full G1 fixture suite (`tests/test_project_data.py`,
+  `tests/test_densify.py`, 11 tests) against real R output.
+- Built the real `ccamlrgis-py` conda dev env (not just dry-run solved) and
+  did an editable install; both work.
+- Found and fixed a real bug while validating `densify_data` against
+  fixtures: manually-added segment endpoints and computed grid-line
+  intersections that land on the same coordinate weren't deduplicating
+  (Python float equality is bit-exact; needed round-before-dedup at 9
+  decimals). Also found and documented a genuine R quirk (not a port bug):
+  R itself emits an exact-duplicate consecutive vertex on some
+  antimeridian-crossing segments (float noise in its own GEOS pipeline) —
+  logged as `porting_notes.md` deviation 7; the G1 test collapses R's
+  consecutive duplicates before comparing rather than requiring raw
+  vertex-count equality.
+
+### Scope not covered this round (by design, for efficiency)
+
+- `load_*` WFS loaders, `clip_to_coast`, `small_bathy` — all need
+  `cache.py` (download/cache/manifest per §1.3) and, for `clip_to_coast`
+  specifically, a sourced copy of the `Coast` dataset. That's a separate,
+  larger unit of work (cache module + eventual GitHub Release data
+  pipeline from §4), deliberately deferred rather than half-built alongside
+  this round's two functions.
+- No CI yet.
+- `cPolys`/`cLines`/`cPoints`/`create_Polys` etc. (Phase 2) not started.
+
+### Next
+
+1. `cache.py` (§1.3), then `load.py` (8 WFS wrappers) and `clip_to_coast`
+   (needs a locally-sourced `Coast` copy for now, ahead of the real data
+   pipeline).
+2. GitHub Actions CI (start with one Python version on ubuntu; expand to
+   the full matrix later — no need to gold-plate before there's more code
+   to test).
+3. Phase 2: `_build_polys`/`_build_lines`/`_build_points`, `create_polys`
+   etc., validated against new G2 fixtures generated the same way as G0/G1.
+
 ## 2026-07-29 — §8 first actions + G0 golden fixtures
 
 ### Done

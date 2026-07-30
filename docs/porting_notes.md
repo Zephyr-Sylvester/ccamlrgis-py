@@ -6,10 +6,10 @@ reason, and the impact on users. Nothing in this list is accidental — where
 the R package rounds, sorts, or uses a particular statistic, the port matches
 it unless a deviation is logged below (§7.6 of the port design).
 
-Status: pre-implementation. The six deviations below are known up front from
-the design decisions in §1–§2 of the port design and are logged pre-emptively
-per §7.4; each will be expanded with concrete detail as its function is
-ported and gated (§6).
+Status: Phase 1 in progress (`project_data`, `densify_data` implemented and
+passing against G1 fixtures). Deviations 1-6 below were known up front from
+the design decisions in §1-§2 of the port design and logged pre-emptively per
+§7.4; deviation 7 was found while implementing `densify_data`.
 
 ## 1. Plotting: stateful base graphics → explicit Axes
 
@@ -132,3 +132,37 @@ recycled will raise in Python (from numpy/pandas broadcasting rules or an
 explicit length check) instead of silently succeeding. This is considered a
 correctness improvement, not a regression, but is called out here because it
 is a behavioural difference on the same input.
+
+## 7. `densify_data`: R's occasional duplicate consecutive vertex not reproduced
+
+**R behaviour:** on some antimeridian-crossing segments, `DensifyData()`
+emits an exact-duplicate consecutive vertex (confirmed on both the
+`antimeridian_ccw` and `antimeridian_cw` G1 fixtures: 206 output rows, only
+202 distinct). This comes from R's own `st_intersection()`/`unique()`
+pipeline: a grid line crossing the segment very close to another grid line's
+crossing produces two points that aren't bit-identical doubles (so R's
+`unique()` keeps both), but are identical at the precision the fixture CSV
+is written at.
+
+**Python behaviour:** `densify_data` rounds candidate vertices to 9 decimal
+degrees (sub-millimeter, far below the 5-decimal precision the geospatial
+rules require) before deduplicating, so this pair collapses to one vertex.
+
+**Reason:** replicating R's exact duplicate here would mean matching GEOS's
+specific floating-point computation path bit-for-bit, which isn't practical
+and wouldn't be meaningful even if achieved — the "faithfulness" bar (§0) is
+about matching geometry and values, not replaying R's internal float noise.
+The rounding-before-dedup approach was also required to fix a real bug it
+uncovered: without it, some segments produced *extra* un-deduplicated
+vertices where a manually-added endpoint and a computed grid intersection
+landed on the same coordinate but different floats (see `building_polygons_
+P1`/`P3` and `exactly_180_wide` in the G1 test history) — same fix, and this
+direction of it is a genuine correctness improvement, not just a cosmetic
+difference from R.
+
+**Impact on users:** on the small subset of segments where this R quirk
+occurs, the Python port returns one fewer (geometrically redundant) vertex
+than R. Polygon/line shape, area, and all downstream computations are
+unaffected — the dropped vertex sat exactly on the retained one. The G1 test
+suite (`tests/test_densify.py`) collapses R's consecutive exact-duplicate
+rows before comparing, rather than requiring raw vertex-count equality.
