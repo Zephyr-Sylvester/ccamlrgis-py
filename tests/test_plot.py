@@ -33,6 +33,23 @@ def test_basemap_returns_configured_axes():
     plt.close(fig)
 
 
+def test_basemap_attribution_renders_sources_and_projection():
+    fig, ax = ccplot.basemap(
+        attribution=["CCAMLR. (2026). Geographical data layer: ASDs. Version 2026, URL: https://example.com"]
+    )
+    assert len(ax.texts) == 1
+    text = ax.texts[0].get_text()
+    assert "CCAMLR." in text
+    assert "Projection: EPSG:6932" in text
+    plt.close(fig)
+
+
+def test_basemap_no_attribution_by_default():
+    fig, ax = ccplot.basemap()
+    assert len(ax.texts) == 0
+    plt.close(fig)
+
+
 def test_add_colour_scale(ax):
     cax = ccplot.add_colour_scale(ax, cuts=[-1000, -500, -200, 0], cols=["#000080", "#0000ff", "#87ceeb"])
     assert len(cax.patches) == 3

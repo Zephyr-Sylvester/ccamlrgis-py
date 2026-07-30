@@ -7,61 +7,61 @@ import geopandas as gpd
 import rioxarray
 
 from . import cache
+from .cite import LAYER_INFO, WFS_URL_TEMPLATE, layer_citation
 from .crs import CCAMLR_CRS
 
-_WFS_URL = (
-    "https://gis.ccamlr.org/geoserver/gis/ows?service=WFS&version=1.0.0"
-    "&request=GetFeature&outputFormat=json&typeName=gis:{layer}"
-)
 _BATHY_URL = "https://gis.ccamlr.org/geoserver/www/GEBCO2024_{res}.tif"
 _VALID_BATHY_RES = (500, 1000, 2500, 5000)
 
 
-def _load_wfs_layer(layer, path=None, force_refresh=False):
-    url = _WFS_URL.format(layer=layer)
-    local_path = cache.fetch(url, name=f"{layer}.json", path=path, force_refresh=force_refresh)
-    gdf = gpd.read_file(local_path)
-    return gdf.to_crs(CCAMLR_CRS)
+def _load_wfs_layer(key, path=None, force_refresh=False):
+    _, type_name = LAYER_INFO[key]
+    url = WFS_URL_TEMPLATE.format(type_name=type_name)
+    local_path = cache.fetch(url, name=f"{type_name}.json", path=path, force_refresh=force_refresh)
+    gdf = gpd.read_file(local_path).to_crs(CCAMLR_CRS)
+    # Rule 8: every loaded layer carries its own citation (design doc section 2).
+    gdf.attrs["citation"] = layer_citation(key)
+    return gdf
 
 
 def load_asds(path=None, force_refresh=False):
     """CCAMLR Statistical Areas, Subareas and Divisions. CCAMLRGIS R: load_ASDs."""
-    return _load_wfs_layer("statistical_areas_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("asds", path=path, force_refresh=force_refresh)
 
 
 def load_ssrus(path=None, force_refresh=False):
     """CCAMLR Small Scale Research Units. CCAMLRGIS R: load_SSRUs."""
-    return _load_wfs_layer("ssrus_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("ssrus", path=path, force_refresh=force_refresh)
 
 
 def load_coastline(path=None, force_refresh=False):
     """Full CCAMLR coastline (UK Polar Data Centre/BAS + Natural Earth). CCAMLRGIS R: load_Coastline."""
-    return _load_wfs_layer("coastline_v1_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("coastline", path=path, force_refresh=force_refresh)
 
 
 def load_rbs(path=None, force_refresh=False):
     """CCAMLR Research Blocks. CCAMLRGIS R: load_RBs."""
-    return _load_wfs_layer("research_blocks_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("rbs", path=path, force_refresh=force_refresh)
 
 
 def load_ssmus(path=None, force_refresh=False):
     """CCAMLR Small Scale Management Units. CCAMLRGIS R: load_SSMUs."""
-    return _load_wfs_layer("ssmus_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("ssmus", path=path, force_refresh=force_refresh)
 
 
 def load_mas(path=None, force_refresh=False):
     """CCAMLR Management Areas. CCAMLRGIS R: load_MAs."""
-    return _load_wfs_layer("omas_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("mas", path=path, force_refresh=force_refresh)
 
 
 def load_mpas(path=None, force_refresh=False):
     """CCAMLR Marine Protected Areas. CCAMLRGIS R: load_MPAs."""
-    return _load_wfs_layer("mpas_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("mpas", path=path, force_refresh=force_refresh)
 
 
 def load_eezs(path=None, force_refresh=False):
     """Exclusive Economic Zones. CCAMLRGIS R: load_EEZs."""
-    return _load_wfs_layer("eez_6932", path=path, force_refresh=force_refresh)
+    return _load_wfs_layer("eezs", path=path, force_refresh=force_refresh)
 
 
 def load_bathy(res=5000, path=None, force_refresh=False):

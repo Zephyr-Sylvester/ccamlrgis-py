@@ -30,3 +30,5 @@ def test_load_layer_structure_matches_r(fixtures, tmp_path, name):
     # this checks structure, not an exact snapshot: same columns present,
     # non-empty, correctly projected.
     assert set(expected["columns"]).issubset(set(gdf.columns))
+    # Rule 8: every loaded layer carries a citation.
+    assert gdf.attrs.get("citation", "").startswith("CCAMLR.")

@@ -106,6 +106,8 @@ False` keyword (§1.3 caching contract) with no R equivalent.
 | Python | Notes |
 |---|---|
 | `ccamlrgis.validate.check_geospatial_rules(gdf, dlon=0.1, check_orientation=True, source_coords=None)` | §2's geospatial rules encoded as code rather than left as prose: CRS is EPSG:6932, no un-densified segment exceeds `dlon`, polygon exterior rings are clockwise (antimeridian-aware), geometry validity, and (only if `source_coords` is supplied) coordinate precision ≥5 decimals. Returns a `GeospatialRulesReport` (truthy iff no violations) with a list of `Violation(rule, message, index)`. |
+| `ccamlrgis.cite.layer_citation(layer, year=None, version=None)` | §2/rule 8's citation string: `"CCAMLR. (Year). Geographical data layer: (Name). Version (Version), URL: (URL)"`. `layer` is a `load_*` key (`"asds"`, `"ssrus"`, `"coastline"`, `"rbs"`, `"ssmus"`, `"mas"`, `"mpas"`, `"eezs"`); `year`/`version` default to the current year, since the live WFS exposes neither. Every `load_*` function stamps this onto its returned GeoDataFrame's `.attrs["citation"]` automatically. |
+| `ccamlrgis.plot.basemap(..., attribution=None)` | rule 9's "cite data sources and the projection used" caption -- pass a citation string, or a list of them (e.g. loaded layers' own `.attrs["citation"]`), rendered bottom-left along with the CRS. Opt-in: no caption is drawn unless `attribution=` is passed. |
 
 ## Data column names — kept as R spellings (deliberate asymmetry)
 

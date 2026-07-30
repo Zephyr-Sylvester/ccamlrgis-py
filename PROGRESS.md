@@ -3,6 +3,32 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (6) — cite.py (§2's other half, now complete)
+
+### Done
+
+- `src/ccamlrgis/cite.py`: `layer_citation(layer, year=None, version=None)`
+  producing rule 8's citation string, plus the `LAYER_INFO` registry
+  (layer key -> human-readable name + WFS typeName) that's now the single
+  source of truth `load.py` also draws from (removed the duplicate
+  typeName strings that used to live directly in `load.py`).
+- Every `load_*` function now stamps `.attrs["citation"]` onto its
+  returned GeoDataFrame automatically (verified against the live WFS, not
+  just a fixture).
+- `ccamlrgis.plot.basemap(..., attribution=None)`: rule 9's source/
+  projection caption, opt-in via the new parameter, rendered bottom-left.
+- 8 new tests, **115/115 tests pass** (95 offline + 20 network).
+- §2 is now fully implemented: `check_geospatial_rules` (previous entry)
+  plus `cite.py` (this one).
+
+### Next
+
+Per the agreed ordering:
+1. The Building-Polygons end-to-end test (plain pytest first).
+2. The four notebooks + `nbval` in CI.
+3. `README.md` full tutorial.
+4. `mypy --strict` compliance (last, one consolidated pass).
+
 ## 2026-07-30 (5) — ccamlrgis.validate.check_geospatial_rules
 
 ### Done
