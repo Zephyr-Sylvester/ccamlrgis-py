@@ -398,8 +398,10 @@ dir.create("tests/fixtures/create_circular_arrow", showWarnings = FALSE, recursi
 
 write.csv(PieData, "tests/fixtures/example_data/PieData.csv", row.names = FALSE)
 write.csv(PieData2, "tests/fixtures/example_data/PieData2.csv", row.names = FALSE)
+write.csv(Labels, "tests/fixtures/example_data/Labels.csv", row.names = FALSE)
 record("tests/fixtures/example_data/PieData.csv")
 record("tests/fixtures/example_data/PieData2.csv")
+record("tests/fixtures/example_data/Labels.csv")
 
 # create_Pies (docstring example: constant size, all classes)
 pies_out <- create_Pies(Input = PieData, NamesIn = c("Lat", "Lon", "Sp", "N"), Size = 50)

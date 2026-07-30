@@ -85,15 +85,15 @@
       "bytes": 747
     },
     "tests/fixtures/clip_to_coast/input.gpkg": {
-      "sha256": "b8b0086b02395637b81fc9bcb77b1c91fd69a95056b02e61cd1b17a55fd0df5d",
+      "sha256": "9aaf14898c06176b6ab2e4e02db709c8a2ffe9630c2056b2d85a89f2bdcb6523",
       "bytes": 122880
     },
     "tests/fixtures/clip_to_coast/output.gpkg": {
-      "sha256": "15007b1ba7a90b4abe7a5ee0f4023be06c88c8772e4083ba136a4e6e4140a642",
+      "sha256": "3dd9d65ad162cc39866a082c97634c356b79449b629f9dff629cfc33535f713e",
       "bytes": 131072
     },
     "tests/fixtures/clip_to_coast/coast_all.gpkg": {
-      "sha256": "2c4b932fb2f4eec1884686bdfddbf9b9d8746b57bc03b21cc041f282130dde21",
+      "sha256": "5cab83c8f7d8580c692ecf7dd6da73a9bf569f29f5cbe1d8d6573d7ea5313640",
       "bytes": 1028096
     },
     "tests/fixtures/load_layers/asds.json": {
@@ -153,27 +153,27 @@
       "bytes": 7000
     },
     "tests/fixtures/create_polys/polydata_default.gpkg": {
-      "sha256": "f014cbc9e84608b2983963dddf5dd1f6c20c7f0f65896ed10ea52869054d5498",
+      "sha256": "775d7d40cccd2ab42b4e17c303cbc8c0365d918df7fb7517bf3f179daa171ded",
       "bytes": 114688
     },
     "tests/fixtures/create_polys/building_polygons.gpkg": {
-      "sha256": "9eb6dddcd9a5627500c593fef70f4d3c3ad4fedb52ee6a0679069c6621c32e1a",
+      "sha256": "858105c8fa067c883d2cc97beb473d9ee3aa83baeb5659ebe7894d5a1d0435bc",
       "bytes": 110592
     },
     "tests/fixtures/create_lines/linedata_densify.gpkg": {
-      "sha256": "a055f6fdecf217616512a9b49cb91dff9e552eb64043179beb1ee29ffd3850be",
+      "sha256": "fe76ecfaae594bc59f0099b2d594affa65965f99ce7f3e6e96107f1ce81eb714",
       "bytes": 118784
     },
     "tests/fixtures/create_points/pointdata.gpkg": {
-      "sha256": "3cccccd55ab84f30e937bdabd45fce1a3c80b1bc74130bffbb0ad36cd71e178b",
+      "sha256": "794a64976ca8a345e419b2b6a075c3093e2674c499d5e8f076e28505116f164c",
       "bytes": 98304
     },
     "tests/fixtures/create_polygrids/griddata_degree.gpkg": {
-      "sha256": "a9ae66071c03a645f6e4a63a7e7f65711ccf764568f9d90f1eaa3d6015306efa",
+      "sha256": "4af0460cf931160e96b3d35791d56d4e30b46796d84049c48ed3b2191337f01a",
       "bytes": 196608
     },
     "tests/fixtures/create_polygrids/griddata_equalarea.gpkg": {
-      "sha256": "b94b381c128e331a84ca3b10c93091df018ddbc082963ef361b41a7e99fda2d1",
+      "sha256": "a6134c0a0d9fcefca5d57e078e8e1b41f69a76998c9b287b4f289a44d3b9fa6b",
       "bytes": 204800
     },
     "tests/fixtures/add_col/pointdata_nfishes_varcol.csv": {
@@ -205,7 +205,7 @@
       "bytes": 284
     },
     "tests/fixtures/get_iso_polys/smallbathy_example.gpkg": {
-      "sha256": "f622bb1845893d583aa894761a8f80a38cf7f20e3ece6cee529251290332736c",
+      "sha256": "0c7529d703e36855b6046826dd18f92fbb931fe48734ecebb177ebf722e198f0",
       "bytes": 172032
     },
     "tests/fixtures/example_data/PieData.csv": {
@@ -216,32 +216,36 @@
       "sha256": "5b81335dc7d656adcfadadaeffd74b12a251b68baa439c950284ea3835047dc3",
       "bytes": 13146
     },
+    "tests/fixtures/example_data/Labels.csv": {
+      "sha256": "1d6d81f9adf504623936c968dce61ba3215ad5f6659bbe577d49d5a397a286cc",
+      "bytes": 4958
+    },
     "tests/fixtures/create_pies/piedata_default.gpkg": {
-      "sha256": "d48e8c4f047dadbc2f67f77deba942e77176b2572d67222ea167c0ce6eac88f7",
+      "sha256": "4a019437795779912543b609056e1dbe21b4d6350f5b8ff6ec520d27a05cd1af",
       "bytes": 110592
     },
     "tests/fixtures/create_ellipse/example.gpkg": {
-      "sha256": "bd37c3470a0510b559d38534c8a3e8ea2eab2fb864e73c98351870e32361ecfd",
+      "sha256": "1068c2648ad136428e3ad0b02b53d7bd557374e3e5c0ed867837afec530e0ebc",
       "bytes": 98304
     },
     "tests/fixtures/create_hashes/polydata_one.gpkg": {
-      "sha256": "5ce0fd1482f98aabd7fb1b4278d79e771c3882a3fa86e4b852977c5313cdae0e",
+      "sha256": "43fe9581e8ef771783bb25e23cdd48f7f0ca10471566b42bd9045b1d5ac2f9e5",
       "bytes": 98304
     },
     "tests/fixtures/create_arrow/example1_straight.gpkg": {
-      "sha256": "b3b9de3d7a6c786a1dc62e255b4e2ebcee125123ac11432d765a5aa0c7f03039",
+      "sha256": "31e6165d2e0d1cb2ff8741a8665e00a69767bfd0c2685d944ff6e5e0d464373d",
       "bytes": 98304
     },
     "tests/fixtures/create_arrow/example2_bend.gpkg": {
-      "sha256": "423ff6b71c476794d8e46aaa295b9746278e4a70680d3533efdf9c53986d969f",
+      "sha256": "5fd1fce5937fc29f90f2ff6d2e06258487c9bc40e62b9ccca49bff8aee5de667",
       "bytes": 102400
     },
     "tests/fixtures/create_arrow/example4_weighted.gpkg": {
-      "sha256": "7e4f1c005d5b102740eb30fc47e7fce6b1822abdd2fab91f24ccd44cb6394184",
+      "sha256": "ccc76b12ca91be6ea0b6df3b12673170d0280f5364afc8bf4b4933881431895c",
       "bytes": 102400
     },
     "tests/fixtures/create_circular_arrow/default.gpkg": {
-      "sha256": "3c5874056ad3d60c3f2f9b16297fa7d4e6f2170377de7c5bcd91bce0385f7a50",
+      "sha256": "46d4d19bd30003056892038c445b09b312a646cdda8c3ee51a54fe53ae0f3720",
       "bytes": 102400
     }
   }

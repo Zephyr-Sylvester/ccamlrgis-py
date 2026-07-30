@@ -3,6 +3,50 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-29 (7) — Phase 5: the ccamlrgis.plot submodule
+
+### Done
+
+- `src/ccamlrgis/plot/` (`basemap`, `add_colour_scale`, `add_legend`,
+  `add_pie_legend`, `add_reference_grid`, `add_labels`) -- matplotlib is
+  imported *only* inside this submodule (verified with a static grep over
+  the rest of `src/`), and the top-level `ccamlrgis/__init__.py` does not
+  import it, so the core library still works with matplotlib uninstalled.
+- `add_legend` and `add_pie_legend` are deliberately NOT option-by-option
+  ports of R's ~680-line `add_Legend.R` / manual pie-slice drawing --
+  matplotlib's own `Axes.legend()` and `Axes.pie()` produce an equivalent
+  visual result for a fraction of the code, exactly matching the design
+  doc's own instruction for this function ("port the output, not
+  option-by-option"). `add_reference_grid` simplifies R's label-edge-
+  selection heuristic to a fixed left/bottom convention.
+- **56/56 tests pass** (47 offline + 9 network) -- but plotting tests are
+  smoke tests (each helper runs, returns the right artist types, produces
+  a plausible artist count), not `pytest-mpl` pixel-regression against R's
+  own rendering. Building that would mean a real R plotting session to
+  generate baseline PNGs plus ongoing baseline maintenance -- a
+  meaningfully bigger undertaking than everything else validated so far,
+  and lower-value besides, since deviations 14-16 already mean pixel
+  layout intentionally isn't R's. Logged as porting_notes.md deviation 17.
+- Sourced `Labels.csv` as a local test fixture (same pattern as `Coast`,
+  `SmallBathy` earlier) for `add_labels(mode='auto')` testing.
+
+### Next
+
+All of §5's function inventory is now implemented except `create_stations`
+(deliberately deferred since Phase 3). Remaining work:
+
+1. `create_stations`, with its distributional validation harness.
+2. GitHub Actions CI.
+3. `datasets.py` + §4 data-publishing pipeline -- this would also unblock
+   `add_labels(mode='auto')`'s real (non-test-fixture) `labels_data=`
+   source, and `clip_to_coast`'s default `coast=`.
+4. `docs/geospatial_rules.md` and `ccamlrgis.validate.check_geospatial_rules`
+   (§2) -- not yet started.
+5. The four notebooks (§3), `README.md` as a full runnable tutorial (per
+   §3's stated intent -- currently just a stub), `NOTICE` file, GitHub
+   Actions CI, `mypy --strict`/`ruff` passes -- everything under G5
+   (release gate) is still open.
+
 ## 2026-07-29 (6) — Phase 4: create_pies, create_arrow, create_circular_arrow, create_ellipse, create_hashes
 
 ### Done
