@@ -3,6 +3,60 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (2) — datasets.py + the §4 data-publishing pipeline
+
+### Done
+
+- Filled a gap from Phase 1: `DEPTH_COLS`/`DEPTH_COLS2`/`DEPTH_CUTS`/
+  `DEPTH_CUTS2` palette constants (R: `data/Depth_*.RData`) were planned
+  for `colours.py` back then but never actually added -- values confirmed
+  via `rdata` against the real R package data and added now, exported at
+  top level.
+- `tools/build_datasets.py`: reads the 7 tabular example datasets
+  (`PolyData`, `GridData`, `PointData`, `LineData`, `PieData`, `PieData2`,
+  `Labels`) via the pure-Python `rdata` package with no R needed; falls
+  back to an R subprocess (`ccamlrgis-r` env, already set up) for `Coast`
+  specifically, since `rdata` cannot properly reconstruct sf
+  geometry/CRS for it (confirmed empirically -- it warns about missing
+  bbox/crs/XY/MULTIPOLYGON/sfg/sfc/sf constructors and returns raw
+  coordinate arrays instead), which is exactly the case the design doc
+  anticipated needing this fallback for. Copies `SmallBathy.tif` as-is,
+  emits `manifest.json` with SHA-256 per file. Ran it: 9 files, 4.7 MB
+  total, all verified loadable with correct CRS/shape.
+- `src/ccamlrgis/datasets.py`: `load_example(name)` and `small_bathy()`,
+  cache-backed fetches from a GitHub Release (`data-v1`) using the
+  existing `cache.py` machinery. Verified end-to-end against the real
+  built artifacts (pre-populated as a "cache," relying on the existing
+  fetch-then-fall-back-to-cache-on-failure behavior -- a real 404 against
+  the not-yet-published release exercises the exact same code path a
+  real future release would once it exists).
+- Resolved porting_notes.md deviation 8: `clip_to_coast(input, coast=None)`
+  now defaults to `datasets.load_example("Coast")`, matching R, now that
+  the pipeline making that download possible exists. Also wired
+  `add_labels(mode='auto')`'s `labels_data=` to the same default.
+- **99/99 tests pass** (79 offline + 20 network).
+
+### Explicitly not done yet (needs your go-ahead)
+
+The actual GitHub Release (`data-v1`) has not been created, and
+`data_artifacts/` (git-ignored, built locally) has not been uploaded
+anywhere. That's a "visible to others" action on your real repo, so it
+needs an explicit decision from you, not an assumption from me. Until a
+release exists, `load_example`/`small_bathy`/`clip_to_coast`'s default/
+`add_labels`'s default will all fail with `CCAMLRGISOfflineError` for any
+user who hasn't pre-populated their own cache -- worth doing before this
+is genuinely usable by anyone else.
+
+### Next
+
+1. **Decide on publishing the `data-v1` release** (see above).
+2. GitHub Actions CI.
+3. `ccamlrgis.validate.check_geospatial_rules` (§2) -- not started.
+4. The four notebooks, a full runnable-tutorial `README.md`, `NOTICE`
+   file, `mypy`/`ruff` passes -- the rest of the G5 release gate.
+5. The Building-Polygons end-to-end notebook test (§6) -- fixtures have
+   existed since G0, test itself not yet written.
+
 ## 2026-07-30 — create_stations (all 41 functions now implemented)
 
 ### Done

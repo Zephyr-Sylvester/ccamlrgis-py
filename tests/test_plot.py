@@ -83,3 +83,21 @@ def test_add_labels_auto_mode(ax, fixtures):
 def test_add_labels_manual_mode_not_supported(ax):
     with pytest.raises(ValueError):
         ccplot.add_labels(ax, mode="manual")
+
+
+@pytest.mark.network
+def test_add_labels_auto_mode_default_data(ax, monkeypatch, tmp_path):
+    """labels_data=None should default to the cache-backed bundled Labels dataset."""
+    import shutil
+    from pathlib import Path
+
+    artifacts = Path(__file__).parent.parent / "data_artifacts"
+    if not artifacts.exists():
+        pytest.skip("data_artifacts/ not built -- run tools/build_datasets.py first")
+    for f in artifacts.iterdir():
+        if f.name != "manifest.json":
+            shutil.copy(f, tmp_path / f.name)
+    monkeypatch.setenv("CCAMLRGIS_CACHE_DIR", str(tmp_path))
+
+    artists = ccplot.add_labels(ax, mode="auto", layer="ASDs")
+    assert len(artists) > 0

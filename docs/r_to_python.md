@@ -39,6 +39,7 @@ required arguments in Python and return a `geopandas.GeoDataFrame`.
 | `load_EEZs()` | `load_eezs()` |
 | `load_Bathy(LocalFile, Res=5000)` | `load_bathy(path=None, res=5000)` | `LocalFile=FALSE` → `path=None`; `LocalFile="path"` → `path="path"` |
 | `SmallBathy()` | `small_bathy()` | cache-backed download, not bundled |
+| — | `ccamlrgis.datasets.load_example(name)` | new; no direct R equivalent (R just references the lazily-loaded bundled object by name, e.g. `PolyData`). `name` is one of `"PolyData"`, `"GridData"`, `"PointData"`, `"LineData"`, `"PieData"`, `"PieData2"`, `"Labels"` (→ `pandas.DataFrame`) or `"Coast"` (→ `geopandas.GeoDataFrame`) |
 
 All load functions additionally gain a Python-only `force_refresh: bool =
 False` keyword (§1.3 caching contract) with no R equivalent.
@@ -80,7 +81,7 @@ False` keyword (§1.3 caching contract) with no R equivalent.
 | R | Python | Notes |
 |---|---|---|
 | `project_data(Input, NamesIn=NULL, NamesOut=NULL, append=TRUE, inv=FALSE)` | `project_data(input, names_in=None, names_out=None, append=True, inverse=False)` | `inv=` → `inverse=`; NA-fill/restore behaviour and "not on Earth" warnings preserved verbatim as `warnings.warn` |
-| `Clip2Coast(Input)` | `clip_to_coast(input, coast)` | `coast` is required for now (temporary, see `porting_notes.md` deviation 8) — pass e.g. `load_coastline()`; a cache-backed default matching R's bundled low-res `Coast` will land once the §4 data pipeline exists |
+| `Clip2Coast(Input)` | `clip_to_coast(input, coast=None)` | `coast=None` defaults to the cache-backed bundled `Coast` dataset, matching R; pass e.g. `load_coastline()` to override (recommended by R's own docs for accuracy) |
 | `assign_areas(Input, Polys, AreaNameFormat='GAR_Long_Label', Buffer=0, NamesIn=NULL, NamesOut=NULL)` | `assign_areas(input, polys, area_name_format='GAR_Long_Label', buffer=0, names_in=None, names_out=None)` | `Polys=c('ASDs','SSRUs')` (names of pre-loaded objects, looked up via R's `get()`) → `polys={'ASDs': asds, 'SSRUs': ssrus}` (a dict of the actual GeoDataFrames) — no safe Python equivalent to R's global-scope lookup; see porting_notes.md deviation 9 |
 | `get_depths(Input, Bathy, NamesIn=NULL)` | `get_depths(input, bathy, names_in=None)` | |
 | `seabed_area(Bathy, Poly, PolyNames=NULL, depth_classes=c(-600,-1800))` | `seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800))` | |

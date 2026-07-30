@@ -8,9 +8,10 @@ from .analysis import (
     rotate_obj,
     seabed_area,
 )
-from .colours import add_colour
+from .colours import DEPTH_COLS, DEPTH_COLS2, DEPTH_CUTS, DEPTH_CUTS2, add_colour
 from .create import create_lines, create_points, create_polygrids, create_polys
 from .crs import CCAMLR_CRS, WGS84
+from .datasets import small_bathy
 from .densify import densify_data
 from .load import (
     load_asds,
@@ -32,6 +33,10 @@ __version__ = "0.1.0.dev0"
 __all__ = [
     "CCAMLR_CRS",
     "WGS84",
+    "DEPTH_COLS",
+    "DEPTH_COLS2",
+    "DEPTH_CUTS",
+    "DEPTH_CUTS2",
     "project_data",
     "densify_data",
     "clip_to_coast",
@@ -61,5 +66,6 @@ __all__ = [
     "load_mpas",
     "load_eezs",
     "load_bathy",
+    "small_bathy",
     "__version__",
 ]

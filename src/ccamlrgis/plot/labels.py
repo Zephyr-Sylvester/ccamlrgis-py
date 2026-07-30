@@ -13,9 +13,10 @@ def add_labels(ax=None, mode="auto", layer=None, labels_data=None, label_table=N
     """Add text labels to a plot.
 
     mode='auto': label the centres of polygon parts of layers loaded via
-    the `load_*` functions. Requires `labels_data` (e.g.
-    `ccamlrgis.datasets.load_example('Labels')`) and `layer` (one or more
-    of "ASDs","SSRUs","RBs","SSMUs","MAs","MPAs","EEZs").
+    the `load_*` functions. `labels_data` defaults to the cache-backed
+    bundled dataset (`ccamlrgis.datasets.load_example('Labels')`), matching
+    R's default. `layer` is one or more of
+    "ASDs","SSRUs","RBs","SSMUs","MAs","MPAs","EEZs".
 
     mode='table': place labels from a table with columns
     x, y, text, and optionally fontsize, angle, col -- R's replacement for
@@ -31,7 +32,9 @@ def add_labels(ax=None, mode="auto", layer=None, labels_data=None, label_table=N
 
     if mode == "auto":
         if labels_data is None:
-            raise ValueError("mode='auto' requires labels_data, e.g. ccamlrgis.datasets.load_example('Labels')")
+            from ..datasets import load_example
+
+            labels_data = load_example("Labels")
         layers = [layer] if isinstance(layer, str) else list(layer)
         weight, style = _style(fonttype)
         rows = labels_data[labels_data["p"].isin(layers)]

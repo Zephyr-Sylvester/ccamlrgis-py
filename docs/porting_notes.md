@@ -170,29 +170,30 @@ unaffected — the dropped vertex sat exactly on the retained one. The G1 test
 suite (`tests/test_densify.py`) collapses R's consecutive exact-duplicate
 rows before comparing, rather than requiring raw vertex-count equality.
 
-## 8. `clip_to_coast` requires an explicit `coast` argument (temporary)
+## 8. `clip_to_coast`'s default `coast` argument (RESOLVED)
 
 **R behaviour:** `Clip2Coast(Input)` takes no coastline argument -- it
 always clips against the package's bundled low-res `Coast` dataset
 (`data/Coast.RData`, loaded lazily with the package).
 
-**Python behaviour:** `clip_to_coast(input, coast)` requires `coast` to be
-passed explicitly (e.g. `load_coastline()`, or any GeoDataFrame/GeoSeries of
-land polygons).
+**Python behaviour:** `clip_to_coast(input, coast=None)` now defaults to
+`ccamlrgis.datasets.load_example("Coast")`, matching R's default, once §4's
+data-publishing pipeline (`tools/build_datasets.py` + a GitHub Release)
+existed to make that cache-backed download possible. `coast=` can still be
+passed explicitly (e.g. `load_coastline()`, which the R docs themselves
+recommend for accuracy) to override it.
 
-**Reason:** under the download-on-demand model (§1.3), R's bundled `Coast`
-becomes a cache-backed download via `ccamlrgis.datasets.load_example`,
-which in turn needs the GitHub Release data-publishing pipeline from §4.
-That pipeline doesn't exist yet. Rather than block `clip_to_coast` entirely
-until it does, or silently default to something that isn't actually R's
-`Coast` dataset, the argument is required for now.
+**History (why this was a temporary deviation before the data pipeline
+existed):** under the download-on-demand model (§1.3), R's bundled `Coast`
+had to become a cache-backed download, which needed §4's pipeline built
+first. Rather than block `clip_to_coast` entirely until then, or silently
+default to something that wasn't actually R's `Coast` dataset, the argument
+was required in the meantime. Resolved once `datasets.py`/
+`tools/build_datasets.py` landed.
 
-**Impact on users:** callers must pass a coastline explicitly for now,
-typically `clip_to_coast(polys, load_coastline())` -- which is *more*
-accurate than R's default low-res `Coast` anyway (R's own docs recommend
-`load_Coastline()` for accuracy, Clip2Coast.R's own docstring says so). Once
-§4's data pipeline exists, a cache-backed low-res default can be restored to
-match R's default behaviour exactly; this note should be revisited then.
+**Impact on users:** `clip_to_coast(polys)` now works with no `coast=`
+argument, matching R, and triggers a cache-backed download of `Coast` on
+first use (or `force_refresh=` on `load_example` to bypass the cache).
 
 ## 9. `assign_areas`: `polys` is a dict of GeoDataFrames, not a name lookup
 

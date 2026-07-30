@@ -18,5 +18,9 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
+# tools/build_datasets.py output -- published as a GitHub Release asset
+# set (design doc section 4), not committed to the repo
+/data_artifacts/
+
 # OS
 .DS_Store

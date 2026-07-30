@@ -1,5 +1,20 @@
 import numpy as np
 
+# CCAMLRGIS R: data/Depth_cols.RData, Depth_cols2.RData, Depth_cuts.RData,
+# Depth_cuts2.RData -- values confirmed via `rdata` against the R package's
+# bundled data. *2 variants highlight the fishable depth range (-600 to
+# -1800 m) with a distinct colour band. Use with add_colour(var, cuts=DEPTH_CUTS, cols=DEPTH_COLS).
+DEPTH_COLS = [
+    "#0000FF", "#061CFF", "#0C39FF", "#1256FF", "#1873FF", "#1E90FF", "#5CACEE",
+    "#71BDF3", "#87CEFA", "#B0E2FF", "#D0EDFF", "#F0F8FF", "#FFFFFF", "#F2F2F2", "#E5E5E5",
+]
+DEPTH_COLS2 = [
+    "#0000FF", "#061CFF", "#0C39FF", "#1256FF", "#1873FF", "#1E90FF", "#66CDAA",
+    "#72E6BF", "#7FFFD4", "#B0E2FF", "#D0EDFF", "#F0F8FF", "#FFFFFF", "#F2F2F2", "#E5E5E5",
+]
+DEPTH_CUTS = [-8200, -7000, -6000, -5000, -4000, -3000, -1800, -1400, -1000, -600, -400, -200, 0, 50, 250, 500]
+DEPTH_CUTS2 = DEPTH_CUTS
+
 # Small vendored name table (not matplotlib): ccamlrgis.plot is the only
 # module allowed to import matplotlib (design doc section 1.2), so add_colour
 # -- used for non-plotting purposes too, e.g. colouring a GeoDataFrame column

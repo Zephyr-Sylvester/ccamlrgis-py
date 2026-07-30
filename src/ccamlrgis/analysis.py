@@ -68,17 +68,20 @@ def project_data(input, names_in=None, names_out=None, append=True, inverse=Fals
     return out
 
 
-def clip_to_coast(input, coast):
+def clip_to_coast(input, coast=None):
     """Clip polygons to a coastline, removing the land portion, and record
     the resulting area. CCAMLRGIS R: Clip2Coast.R.
 
-    Unlike R (which defaults to a bundled low-res ``Coast`` dataset),
-    ``coast`` must be supplied explicitly for now -- e.g. the output of
-    ``load_coastline()`` -- since that bundled dataset isn't hosted yet via
-    the cache pipeline (see porting_notes.md). ``coast`` may be any
-    GeoDataFrame/GeoSeries of land polygons; all of its geometries are
-    unioned before differencing.
+    ``coast`` defaults to the cache-backed bundled ``Coast`` dataset
+    (``ccamlrgis.datasets.load_example("Coast")``), matching R's default.
+    Pass a GeoDataFrame/GeoSeries of land polygons -- e.g. the output of
+    ``load_coastline()``, which the R docs recommend for accuracy -- to
+    override it; all of its geometries are unioned before differencing.
     """
+    if coast is None:
+        from .datasets import load_example
+
+        coast = load_example("Coast")
     land = coast.geometry.union_all() if hasattr(coast, "geometry") else coast.union_all()
     output = input.copy()
     output["geometry"] = output.geometry.difference(land)
