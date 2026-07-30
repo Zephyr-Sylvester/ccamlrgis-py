@@ -3,6 +3,17 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (4) — LICENSE + NOTICE
+
+Added `LICENSE` (canonical GPL-3.0 text, fetched directly from
+gnu.org/licenses/gpl-3.0.txt rather than reconstructed from memory, since
+it's a legal document) and `NOTICE` (crediting CCAMLRGIS R's authors,
+stating this is an unofficial community port not affiliated with CCAMLR,
+pointing to the authoritative data sources) per section 7.7's licence
+hygiene requirement. `pyproject.toml` already declared
+`license = "GPL-3.0-or-later"`; there was just no LICENSE file backing it
+until now.
+
 ## 2026-07-30 (3) — GitHub Actions CI
 
 ### Done

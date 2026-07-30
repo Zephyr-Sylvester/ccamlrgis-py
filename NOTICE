@@ -1,0 +1,32 @@
+ccamlrgis (Python) — NOTICE
+
+This package is an unofficial community port to Python of the CCAMLRGIS R
+package (https://github.com/ccamlr/CCAMLRGIS), authored by the CCAMLR
+Secretariat. It is a derivative work, licensed under the GNU General
+Public License v3.0 or later (see LICENSE), matching the license of the
+original R package.
+
+This is NOT a product of the CCAMLR Secretariat or the Commission for the
+Conservation of Antarctic Marine Living Resources. It is not endorsed by,
+maintained by, or affiliated with CCAMLR. Authoritative CCAMLR spatial
+data and tools remain at:
+
+  - https://gis.ccamlr.org/
+  - https://github.com/ccamlr/data
+
+CCAMLRGIS (R) is credited to its authors:
+
+  - Stephane Thanassekos
+  - Keith Reid
+  - Lucy Robinson
+  - Michael D. Sumner (contributor)
+  - Roger Bivand (contributor)
+
+Geospatial rules and the Building Polygons workflow referenced by this
+port are drawn from the CCAMLR Secretariat's geospatial_operations
+repository (https://github.com/ccamlr/geospatial_operations), endorsed by
+the Scientific Committee in 2023 (SC-CAMLR-42, para 2.30).
+
+See docs/porting_notes.md for a complete list of behavioural differences
+between this port and the original R package, and docs/r_to_python.md for
+the function/argument mapping between them.
