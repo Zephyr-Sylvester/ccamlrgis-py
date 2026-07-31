@@ -68,6 +68,7 @@ def add_labels(
                     style=style,
                     ha="center",
                     va="center",
+                    clip_on=True,
                 )
             )
     elif mode == "table":
@@ -87,6 +88,7 @@ def add_labels(
                     style=style,
                     ha="center",
                     va="center",
+                    clip_on=True,
                 )
             )
     else:

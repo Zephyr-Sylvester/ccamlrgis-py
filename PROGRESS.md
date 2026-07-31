@@ -3,6 +3,29 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-31 (3) — Fix `add_labels` leaking off-screen labels on zoomed maps
+
+Found using the package for real, outside this repo: a new sibling
+project (`../southern-ocean-maps`, a from-scratch consumer of
+`ccamlrgis`, not a tutorial recreation) building a zoomed Subarea 48 map
+turned up labels from every other ASD (58.x, 88.x) rendering scattered
+across the figure margin, well outside the map extent.
+
+**Cause:** `add_labels`' `ax.text()` calls never set `clip_on`, so
+matplotlib's default (`False` for `Text`) let every label render at its
+raw coordinates regardless of the axes' current `xlim`/`ylim` -- fine on
+a full-continent view (every label is in-bounds already, so the tutorial
+never exposed this), broken on any zoomed view. R's base graphics clips
+to the plot region by default, so this was an unintended deviation.
+
+**Fix:** `clip_on=True` on both `mode='auto'` and `mode='table'` label
+placement (`docs/porting_notes.md` deviation 2 follow-up). Re-executed
+the two notebooks that use `add_labels` (01, 06) to confirm zero visual
+change on the existing full-continent figures -- none, as expected, which
+also confirms the bug really was invisible until a zoomed use case
+exercised it. Full validation green (95 offline tests, ruff, `mypy
+--strict`).
+
 ## 2026-07-31 (2) — Fix `add_legend`'s Circle/Ellipse/Arrow rendering as boxes; document the `get_iso_polys`/`contourf` dead end
 
 Continuing the plotting-quality review: user reported that section 5.3's

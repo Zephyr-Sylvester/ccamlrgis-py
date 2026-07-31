@@ -53,6 +53,20 @@ table (adjusting `Labx`/`Laby`/text columns) and passing it via
 `mode='table'`, rather than clicking on a plot. This is documented as the
 replacement workflow, not silently unsupported.
 
+**Follow-up (2026-07-31):** `add_labels`'s `ax.text()` calls now pass
+`clip_on=True` (both `mode='auto'` and `mode='table'`). Without it, a
+zoomed-in map (e.g. a single-subarea view, `xlim`/`ylim` set narrower
+than the full loaded layer) still rendered every label from the full
+`layer=` selection, including ones whose anchor point sits well outside
+the visible extent -- they'd draw wherever their coordinates put them,
+overlapping the title, legend, or colour scale, or floating in the
+figure margin outside the axes entirely. R's base graphics clips to the
+plot region by default (`par(xpd=FALSE)`), so this was an unintended
+deviation, not a considered one -- caught using the library on a real
+zoomed regional map, not by the existing tutorial (which only exercises
+`add_labels` on full-continent views, where every label is already
+in-bounds and the bug is invisible).
+
 ## 3. `get_iso_polys`: `isoband` → matplotlib contours / rasterio polygonisation
 
 **R behaviour:** uses the `isoband` package (`isobands()` / `iso_to_sfg()`)
