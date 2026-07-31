@@ -914,6 +914,17 @@ R's `isoband`-based smooth contours are replaced with
 raster cell edges (blocky) rather than being interpolated; see
 `docs/porting_notes.md`.
 
+**If you want smoother-looking bands than this**, swapping the plot call
+for `contourf` looks tempting but isn't a free win -- we tried it and it
+comes out worse for small/sparse features (e.g. Example 2's seamounts
+nearly vanish) and no better for the broad view, plus it needs the raster
+manually masked to match `get_iso_polys(strict=True)`'s "cells outside
+`cuts` are dropped" behaviour. See `docs/porting_notes.md` deviation 12's
+follow-up for the full comparison if you want to pick this up -- the more
+promising direction is a real smooth-contour library (`contourpy`) inside
+`get_iso_polys` itself, or simply `load_bathy()` instead of
+`small_bathy()` for more source pixels per feature.
+
 ### 4.7. rotate_obj
 
 Rotates a vector or raster object so a chosen longitude points up. For

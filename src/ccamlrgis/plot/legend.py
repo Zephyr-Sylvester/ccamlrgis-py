@@ -9,6 +9,7 @@ shapes), far less surface area. See porting_notes.md.
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import geopandas as gpd
 import matplotlib.lines as mlines
@@ -16,9 +17,70 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.legend import Legend
+from matplotlib.legend_handler import HandlerPatch
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 _SHAPES = ("rectangle", "circle", "ellipse", "line", "arrow", "none")
+
+
+def _circle_icon(
+    legend: Legend,
+    orig_handle: mpatches.Patch,
+    xdescent: float,
+    ydescent: float,
+    width: float,
+    height: float,
+    fontsize: float,
+) -> mpatches.Circle:
+    r = min(width, height) / 2
+    return mpatches.Circle((width / 2 - xdescent, height / 2 - ydescent), r)
+
+
+def _ellipse_icon(
+    legend: Legend,
+    orig_handle: mpatches.Patch,
+    xdescent: float,
+    ydescent: float,
+    width: float,
+    height: float,
+    fontsize: float,
+) -> mpatches.Ellipse:
+    return mpatches.Ellipse((width / 2 - xdescent, height / 2 - ydescent), width, height * 0.6)
+
+
+def _arrow_icon(
+    legend: Legend,
+    orig_handle: mpatches.Patch,
+    xdescent: float,
+    ydescent: float,
+    width: float,
+    height: float,
+    fontsize: float,
+) -> mpatches.FancyArrow:
+    return mpatches.FancyArrow(
+        -xdescent,
+        height / 2 - ydescent,
+        width,
+        0,
+        width=height * 0.2,
+        head_width=height * 0.7,
+        head_length=width * 0.3,
+        length_includes_head=True,
+    )
+
+
+# matplotlib's default Patch legend handler (HandlerPatch, patch_func=None)
+# always draws a plain Rectangle icon, copying only style properties
+# (facecolor/edgecolor/linewidth/hatch) from the real handle -- not its
+# shape. Rectangle and the alpha=0 "none" placeholder happen to look
+# right anyway (a rectangle IS what they should show), but Circle/
+# Ellipse/FancyArrow all rendered as boxes without this -- see
+# porting_notes.md.
+_HANDLER_MAP: dict[Any, HandlerPatch] = {
+    mpatches.Circle: HandlerPatch(patch_func=_circle_icon),
+    mpatches.Ellipse: HandlerPatch(patch_func=_ellipse_icon),
+    mpatches.FancyArrow: HandlerPatch(patch_func=_arrow_icon),
+}
 
 
 @dataclass
@@ -92,6 +154,7 @@ def add_legend(
     return ax.legend(  # type: ignore[call-overload,no-any-return]
         handles,
         labels,
+        handler_map=_HANDLER_MAP,
         loc=loc,
         title=legend_title,
         fontsize=fontsize,

@@ -3,6 +3,51 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-31 (2) — Fix `add_legend`'s Circle/Ellipse/Arrow rendering as boxes; document the `get_iso_polys`/`contourf` dead end
+
+Continuing the plotting-quality review: user reported that section 5.3's
+second `add_legend` example only showed rectangle icons for every item,
+regardless of the item's actual `shape=`.
+
+**Cause:** matplotlib's default legend handler for any `Patch`
+(`HandlerPatch`, `patch_func=None`) copies only *style* properties
+(facecolor/edgecolor/linewidth/hatch) onto a fresh `Rectangle` -- it never
+preserves the original patch's real shape. `add_legend` was handing raw
+`Circle`/`Ellipse`/`FancyArrow` instances straight to `Axes.legend()`
+with no `handler_map`, so all three silently degraded to rectangle icons.
+`Rectangle` and the alpha=0 "none" placeholder happened to already look
+right (a rectangle icon is exactly what they should show); `Line2D` has
+its own correct default handler.
+
+**Fix:** a `handler_map` with a custom `HandlerPatch(patch_func=...)` per
+shape class (`_circle_icon`/`_ellipse_icon`/`_arrow_icon` in
+`src/ccamlrgis/plot/legend.py`), each building a correctly-shaped replica
+sized to the legend's icon box -- the documented matplotlib pattern for
+this ("Implementing a custom legend handler" in matplotlib's own Legend
+guide), not a hard limitation as originally suspected. Verified by
+re-rendering the actual 13-item notebook example: all six shape types now
+show correctly.
+
+Also investigated, on request, whether `get_iso_polys`'s section 4.6
+figures would look better rendered via `contourf` instead of the blocky
+`get_iso_polys` polygons -- prototyped and rejected after visual
+comparison: no improvement on the broad view (same underlying pixel
+noise), and actively worse for small/sparse features (the SSRU 882H
+seamounts example nearly disappears, since `contourf`'s marching-squares
+interpolation of ~100 scattered pixels produces slivers that vanish at
+notebook figure sizes, where `get_iso_polys`'s vector polygons stay
+visible). `contourf`'s `extend` behaviour also doesn't match
+`get_iso_polys(strict=True)`'s semantics without manually masking the
+array first. Left as-is; documented in both
+`docs/porting_notes.md` (deviation 12 follow-up, for developers) and
+`README.md`/`notebooks/05_other_functions.ipynb` (for users who want to
+pick this up themselves) so the dead end isn't silently rediscovered.
+
+Regenerated: notebook 06's `add_legend` figure, notebook 05 (new
+markdown note only, no figure change), `readme_figs/06_..._06.png`,
+`README.md`. Full validation green throughout (95 offline tests, ruff,
+`mypy --strict`, full README executed end-to-end as one script).
+
 ## 2026-07-31 — Fix `add_colour_scale` overlapping the map
 
 User feedback after reviewing the notebooks/README: every figure using

@@ -314,6 +314,37 @@ matplotlib itself now uses and which doesn't require a plotting backend)
 would close this gap and is a reasonable future improvement, not attempted
 here to avoid a new dependency for a first pass.
 
+**Follow-up (2026-07-31) -- a plotting-only workaround was tried and
+rejected, for anyone tempted to retry it:** rendering `get_iso_polys`'
+input raster directly with matplotlib/xarray's `contourf` (bypassing the
+blocky polygons for display only, while still calling `get_iso_polys` for
+anything needing real geometry, e.g. group labels) sounds like a free
+win but is not, on the README section 4.6 examples:
+- Whole-Convention-Area view: no visible improvement -- `contourf`
+  traces the same noisy per-pixel boundaries `get_iso_polys` does; the
+  raggedness comes from the underlying bathymetry values being genuinely
+  scattered at that few cuts, not from how the boundary is drawn.
+- Small/sparse features (the SSRU 882H seamounts example, ~100 pixels
+  total): actually worse. `get_iso_polys`' vector polygons render as
+  small but visible shapes at any figure size; `contourf`'s marching-
+  squares interpolation of that same sparse cluster produces thin
+  slivers that nearly vanish at typical figure sizes.
+- `contourf`'s default `extend` behaviour also does not match
+  `get_iso_polys(strict=True)`'s semantics (cells outside the `cuts`
+  range are dropped, not painted with the boundary colour) -- reproducing
+  that requires manually masking the array to NaN outside `[cuts[0],
+  cuts[-1]]` before calling `contourf`, which is exactly the same
+  "which cells count" logic `get_iso_polys` already does, just
+  reimplemented at the call site.
+
+The real fix, if this is revisited, is upstream of plotting: either a
+genuine smooth-contour library at the data level (`contourpy`, as above
+-- so `get_iso_polys` itself returns smoother polygons, which every
+consumer benefits from, not just one figure) or higher source-raster
+resolution (`load_bathy()` instead of `small_bathy()` -- more real pixels
+per seamount means less of both problems). Left as-is in the tutorial;
+see `PROGRESS.md` 2026-07-31 for the full comparison.
+
 ## 13. Phase 4 secondary code paths: implemented, lighter-touch tested
 
 **Scope:** `create_pies`'s `grid_km=` + `size_var=` combination, and
@@ -366,6 +397,24 @@ Per-item fine controls (`ShiftX`, `STSpace`, hash patterns via
 built-in `hatch=` instead of real hash geometry, since this is cosmetic.
 Visual result (a positioned box of labelled shapes) is equivalent; exact
 pixel layout is not.
+
+**Follow-up (2026-07-31):** an early version of this fix handed
+`Circle`/`Ellipse`/`FancyArrow` patch instances straight to
+`Axes.legend()` and every one of them rendered as a plain rectangle icon
+-- user-reported after reviewing the tutorial. Cause: matplotlib's
+default legend handler for any `Patch` (`HandlerPatch`, registered
+generically, `patch_func=None`) only copies *style* properties
+(facecolor/edgecolor/linewidth/hatch) onto a fresh `Rectangle` -- it does
+not preserve the original patch's actual shape. This is a documented
+matplotlib quirk (see "Implementing a custom legend handler" in
+matplotlib's own Legend guide), not a hard limitation: the fix is a
+`handler_map={Circle: HandlerPatch(patch_func=...), Ellipse: ...,
+FancyArrow: ...}` passed to `Axes.legend()`, each `patch_func` building a
+correctly-shaped replica sized to the legend's icon box (`Rectangle` and
+the alpha=0 "none" placeholder already looked right, since a rectangle
+icon is what they're supposed to show; `Line2D` already has its own
+correct default handler, `HandlerLine2D`). See `_HANDLER_MAP` in
+`src/ccamlrgis/plot/legend.py`.
 
 ## 15. `add_pie_legend`: matplotlib's native `pie()`, not manual slice geometry
 
