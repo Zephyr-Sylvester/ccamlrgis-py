@@ -3,6 +3,44 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-31 — Fix `add_colour_scale` overlapping the map
+
+User feedback after reviewing the notebooks/README: every figure using
+`add_colour_scale` had the colour-scale bar drawn *on top of* the map
+instead of beside it -- a real, visible quality gap against the R
+package's own figures (`docs/porting_notes.md` deviation 4 already
+tracked the `pos=`→`loc=` API difference, but not this).
+
+**Root cause:** `add_colour_scale` (`src/ccamlrgis/plot/scale.py`) used
+`mpl_toolkits.axes_grid1.inset_locator.inset_axes(ax, ...)`, which draws
+inside `ax`'s own bounding box rather than reserving separate layout
+space -- unlike R's `add_Cscale`, which works within margin space the
+user reserves up front via `par(mar=...)`.
+
+**Fix:** switched to `mpl_toolkits.axes_grid1.make_axes_locatable(ax)
+.append_axes(loc, size=, pad=)`, which shrinks `ax` to make room for the
+scale bar -- genuinely non-overlapping, verified both visually and by an
+automated `Axes.get_window_extent()` overlap check after
+`fig.canvas.draw()`. API change (this is a young, unreleased package, so
+no back-compat shim): `width=`/`height=` → `size=` (scale bar thickness)
++ `pad=` (gap, in inches); `loc=` is now an edge position
+(`"right"`/`"left"`/`"top"`/`"bottom"`) instead of a legend-style corner
+string, since `append_axes` only supports edges.
+
+Regenerated everything downstream: all 6 notebooks re-executed (zero
+error outputs), `readme_figs/*.png` re-extracted, `README.md`'s
+`add_colour_scale(...)` calls updated to the new API, `docs/r_to_python.md`
+and `docs/porting_notes.md` (deviation 4) updated. Full validation stayed
+green throughout (95 offline tests, ruff, `mypy --strict`).
+
+**Not done / explicitly out of scope for this fix**: the user separately
+flagged that matching R's figures more broadly (not just this one
+overlap) is a bigger open question -- possibly worth a "v2" pass, possibly
+a reason to build a dedicated Southern-Ocean plotting library rather than
+patch `ccamlrgis.plot` incrementally. That's a future-session discussion,
+not something resolved here; see the `ccamlrgis-py-plotting-quality-gap`
+memory note for context if picked up in a fresh chat.
+
 ## 2026-07-30 (10) — mypy --strict compliance (G5 release gate, done)
 
 The whole package (19 source files under `src/ccamlrgis/`, ~2,600 lines)

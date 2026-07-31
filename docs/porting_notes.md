@@ -71,22 +71,33 @@ sub-pixel level. Gate G3 requires total area per band to match R to within
 0.1% — this is the function most likely to hide a subtle divergence, and it
 gets extra validation attention for that reason.
 
-## 4. `add_Cscale(pos='1/1', ...)` grid-position string → matplotlib `loc=`
+## 4. `add_Cscale(pos='1/1', ...)` grid-position string → matplotlib edge `loc=`
 
 **R behaviour:** `pos` is a base-graphics grid-position idiom (e.g.
 `'1/1'`) describing where in a notional grid over the plot the colour scale
-is drawn.
+is drawn; R reserves that space up front via `par(mar=...)`, so the scale
+never overlaps the plotted data.
 
-**Python behaviour:** `ccamlrgis.plot.add_colour_scale` accepts a matplotlib-
-style `loc=` string (e.g. `'lower right'`) and/or explicit `inset_axes`
-placement, not the `'row/col'` string.
+**Python behaviour:** `ccamlrgis.plot.add_colour_scale` accepts `loc=` as
+one of `"right"`/`"left"`/`"top"`/`"bottom"`, placed with
+`mpl_toolkits.axes_grid1.make_axes_locatable(ax).append_axes(loc, size=,
+pad=)` -- this shrinks `ax` to make room for the scale bar, matching R's
+"never overlaps" behaviour, rather than floating an `inset_axes` on top of
+`ax` (an earlier version of this port did exactly that, and the resulting
+scale bar sat on top of the map -- fixed after user feedback that every
+figure using it looked visibly worse than the R original).
 
 **Reason:** the R idiom is specific to base graphics' device model and has no
-meaning in matplotlib's Axes/figure coordinate system.
+meaning in matplotlib's Axes/figure coordinate system; a real layout-managed
+placement (not just an inset) is needed to match R's non-overlapping result.
 
 **Impact on users:** existing `pos='1/1'`-style calls must be translated to a
 `loc=` string by hand; `docs/r_to_python.md` documents the replacement
-argument.
+argument. `width=`/`height=` (R: `Cscale`'s own sizing params, this port's
+earlier `inset_axes`-based sizing) are now `size=` (scale bar thickness, a
+fraction of `ax`, e.g. `"5%"`) and `pad=` (gap between `ax` and the scale
+bar, in inches) -- `height=` is gone since `append_axes` spans the full
+height (or width, for `top`/`bottom`) of `ax` automatically.
 
 ## 5. Bundled data → cache-backed downloads
 

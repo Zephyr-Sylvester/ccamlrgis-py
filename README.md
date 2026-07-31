@@ -100,7 +100,7 @@ coast = cg.load_coastline()
 fig, ax = cgplot.basemap(figsize=(9, 7.5))
 bathy_small.plot(ax=ax, cmap=depth_cmap, norm=depth_norm, add_colorbar=False)
 cgplot.add_reference_grid(ax=ax, res_lat=10, res_lon=20, lab_lon=0, fontsize=7.5)
-cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, width="6%", height="55%")
+cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, size="6%")
 asds.boundary.plot(ax=ax, edgecolor="red", linewidth=0.75)
 eezs.boundary.plot(ax=ax, edgecolor="red", linewidth=0.75)
 coast.plot(ax=ax, color="grey", linewidth=0.01)
@@ -124,7 +124,7 @@ labels = datasets.load_example("Labels")
 
 fig, ax = cgplot.basemap(figsize=(8, 6))
 bathy_486.plot(ax=ax, cmap=depth_cmap, norm=depth_norm, add_colorbar=False)
-cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, width="8%", height="70%")
+cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, size="8%")
 coast_486.plot(ax=ax, color="grey", linewidth=0.01)
 cgplot.add_reference_grid(ax=ax, res_lat=5, res_lon=10, fontsize=7.5)
 s486.boundary.plot(ax=ax, edgecolor="red", linewidth=1)
@@ -376,7 +376,7 @@ grid_col = cg.add_colour(grid["Catch_sum"], cuts=my_cuts, cols=["yellow", "purpl
 # Step 4: plot the result and add a colour scale
 cgplot.basemap(ax=ax_map)
 grid.plot(ax=ax_map, color=grid_col["varcol"], linewidth=0.1)
-cgplot.add_colour_scale(ax=ax_map, cuts=grid_col["cuts"], cols=grid_col["cols"], title="Sum of Catch (t)", width="10%", height="70%")
+cgplot.add_colour_scale(ax=ax_map, cuts=grid_col["cuts"], cols=grid_col["cols"], title="Sum of Catch (t)", size="10%")
 
 fig.tight_layout()
 plt.show()
@@ -428,7 +428,7 @@ stations1 = cg.create_stations(my_poly, bathy_crop, depths=[-2000, -1500, -1000,
 fig, ax = plt.subplots(figsize=(8, 6))
 cgplot.basemap(ax=ax)
 bathy_crop.plot(ax=ax, cmap=strata_cmap, norm=strata_norm, add_colorbar=False)
-cgplot.add_colour_scale(ax=ax, cuts=my_cols["cuts"], cols=my_cols["cols"], width="8%", height="70%")
+cgplot.add_colour_scale(ax=ax, cuts=my_cols["cuts"], cols=my_cols["cols"], size="8%")
 my_poly.boundary.plot(ax=ax, edgecolor="red", linewidth=2)
 stations1.plot(ax=ax, marker="+", color="orange")
 plt.show()
@@ -451,7 +451,7 @@ stations2 = cg.create_stations(
 fig, ax = plt.subplots(figsize=(8, 6))
 cgplot.basemap(ax=ax)
 bathy_crop.plot(ax=ax, cmap=strata_cmap, norm=strata_norm, add_colorbar=False)
-cgplot.add_colour_scale(ax=ax, cuts=my_cols["cuts"], cols=my_cols["cols"], width="8%", height="70%")
+cgplot.add_colour_scale(ax=ax, cuts=my_cols["cuts"], cols=my_cols["cols"], size="8%")
 my_poly.boundary.plot(ax=ax, edgecolor="red", linewidth=2)
 for stratum, colour in [("1000-550", "yellow"), ("1500-1000", "orange"), ("2000-1500", "red")]:
     stations2[stations2["Stratum"] == stratum].plot(ax=ax, marker="o", color=colour, edgecolor="black", markersize=20)
@@ -947,7 +947,7 @@ the Fishable Depth range, 600-1800m).
 fig, ax = plt.subplots(figsize=(7, 6))
 cgplot.basemap(ax=ax)
 bathy_small.plot(ax=ax, cmap=depth_cmap, norm=depth_norm, add_colorbar=False)
-cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, width="8%", height="70%")
+cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, size="8%")
 plt.show()
 ```
 
@@ -960,7 +960,7 @@ depth_norm2 = BoundaryNorm(cg.DEPTH_CUTS2, depth_cmap2.N)
 fig, ax = plt.subplots(figsize=(7, 6))
 cgplot.basemap(ax=ax)
 bathy_small.plot(ax=ax, cmap=depth_cmap2, norm=depth_norm2, add_colorbar=False)
-cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS2, cols=cg.DEPTH_COLS2, width="8%", height="70%")
+cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS2, cols=cg.DEPTH_COLS2, size="8%")
 plt.show()
 ```
 
@@ -981,21 +981,21 @@ fig, axes = plt.subplots(3, 1, figsize=(6, 12))
 my_cols = cg.add_colour(my_points["Nfishes"])
 ax = cgplot.basemap(ax=axes[0])[1]
 my_points.plot(ax=ax, color=list(my_cols["varcol"]), markersize=40, edgecolor="black", linewidth=0.5)
-cgplot.add_colour_scale(ax=ax, cuts=my_cols["cuts"], cols=my_cols["cols"], title="Number of fishes", width="8%", height="90%")
+cgplot.add_colour_scale(ax=ax, cuts=my_cols["cuts"], cols=my_cols["cols"], title="Number of fishes", size="8%")
 ax.set_title("Example 1", fontsize=9)
 
 # Example 2: fewer cuts
 my_cols = cg.add_colour(my_points["Nfishes"], cuts=10)
 ax = cgplot.basemap(ax=axes[1])[1]
 my_points.plot(ax=ax, color=list(my_cols["varcol"]), markersize=40, edgecolor="black", linewidth=0.5)
-cgplot.add_colour_scale(ax=ax, cuts=np.round(my_cols["cuts"], 1), cols=my_cols["cols"], title="Number of fishes", width="8%", height="90%")
+cgplot.add_colour_scale(ax=ax, cuts=np.round(my_cols["cuts"], 1), cols=my_cols["cols"], title="Number of fishes", size="8%")
 ax.set_title("Example 2", fontsize=9)
 
 # Example 3: same, with custom colours
 my_cols = cg.add_colour(my_points["Nfishes"], cuts=10, cols=["black", "yellow", "purple", "cyan"])
 ax = cgplot.basemap(ax=axes[2])[1]
 my_points.plot(ax=ax, color=list(my_cols["varcol"]), markersize=40, edgecolor="black", linewidth=0.5)
-cgplot.add_colour_scale(ax=ax, cuts=np.round(my_cols["cuts"], 1), cols=my_cols["cols"], title="Number of fishes", width="8%", height="90%")
+cgplot.add_colour_scale(ax=ax, cuts=np.round(my_cols["cuts"], 1), cols=my_cols["cols"], title="Number of fishes", size="8%")
 ax.set_title("Example 3", fontsize=9)
 
 fig.tight_layout()
@@ -1015,7 +1015,7 @@ grid_col = cg.add_colour(my_grid["Catch_sum"], cuts=my_cuts, cols=["blue", "whit
 fig, ax = plt.subplots(figsize=(8, 6))
 cgplot.basemap(ax=ax)
 my_grid.plot(ax=ax, color=list(grid_col["varcol"]), linewidth=0.1)
-cgplot.add_colour_scale(ax=ax, cuts=grid_col["cuts"], cols=grid_col["cols"], title="Sum of Catch (t)", width="10%", height="80%")
+cgplot.add_colour_scale(ax=ax, cuts=grid_col["cuts"], cols=grid_col["cols"], title="Sum of Catch (t)", size="10%")
 plt.show()
 ```
 
@@ -1032,7 +1032,7 @@ bathy_cr = bathy_small.rio.clip_box(*(my_points.total_bounds + [-100000, -100000
 fig, ax = plt.subplots(figsize=(8, 5))
 cgplot.basemap(ax=ax)
 bathy_cr.plot(ax=ax, cmap=depth_cmap, norm=depth_norm, add_colorbar=False)
-cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, width="8%", height="60%", loc="upper left")
+cgplot.add_colour_scale(ax=ax, cuts=cg.DEPTH_CUTS, cols=cg.DEPTH_COLS, size="8%", loc="left")
 
 markers = {"one": ("o", "red"), "two": ("s", "green"), "three": ("D", "blue"), "four": ("^", "yellow")}
 for name, (marker, colour) in markers.items():
