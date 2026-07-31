@@ -3,6 +3,32 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (9) — README.md: full tutorial (port of the R README)
+
+`README.md` is now a full port of the R package's own 2,400-line
+`README.md` tutorial, per the design doc's file-layout note ("port of the
+R README tutorial, as runnable Python"). Same section structure
+(Introduction, 1. Basemaps, 2. Create functions incl. 2.2-2.7, 3. Load
+functions, 4. Other functions, 5. Adding colours/legends/labels), all 46
+figures embedded (`readme_figs/`, extracted from the six executed
+notebooks -- same source of truth, no hand-copied code).
+
+Verified two ways before committing: every `python` fenced block
+individually `compile()`s, and all 51 blocks concatenated into one script
+(mirroring how R's README chunks build on each other -- `coast`, `asds`,
+`bathy_small` etc. carry across sections) execute top-to-bottom with zero
+errors under a headless (Agg) backend. Satisfies design doc G5's "README
+examples all run".
+
+Added `Where to go next` and a `Geospatial rules and citations` section
+pointing at `check_geospatial_rules`/`layer_citation`, plus one new
+prose-only comparison in §5.5 (`ggplot2`/`gridExtra` -> geopandas +
+matplotlib subplots, no extra plotting library needed).
+
+### Next
+
+1. `mypy --strict` compliance (last, one consolidated pass).
+
 ## 2026-07-30 (8) — Recreate the R package's README figures as notebooks
 
 At the user's request, after the Building-Polygons test landed: six
