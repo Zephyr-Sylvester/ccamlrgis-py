@@ -8,14 +8,16 @@ import hashlib
 import json
 import os
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import platformdirs
 import requests
 
 
 class CCAMLRGISOfflineError(Exception):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(
             f"Could not fetch '{name}' and no cached copy is available. "
             "Run ccamlrgis.cache.prefetch() while online, or point "
@@ -24,7 +26,7 @@ class CCAMLRGISOfflineError(Exception):
         self.name = name
 
 
-def cache_dir(path=None):
+def cache_dir(path: str | Path | None = None) -> Path:
     if path is not None:
         return Path(path)
     env = os.environ.get("CCAMLRGIS_CACHE_DIR")
@@ -33,20 +35,22 @@ def cache_dir(path=None):
     return Path(platformdirs.user_cache_dir("ccamlrgis"))
 
 
-def _manifest_path(directory):
+def _manifest_path(directory: Path) -> Path:
     return directory / "manifest.json"
 
 
-def _load_manifest(directory):
+def _load_manifest(directory: Path) -> dict[str, Any]:
     p = _manifest_path(directory)
     return json.loads(p.read_text()) if p.exists() else {}
 
 
-def _save_manifest(directory, manifest):
+def _save_manifest(directory: Path, manifest: dict[str, Any]) -> None:
     _manifest_path(directory).write_text(json.dumps(manifest, indent=2, sort_keys=True))
 
 
-def fetch(url, name, path=None, force_refresh=False, timeout=60):
+def fetch(
+    url: str, name: str, path: str | Path | None = None, force_refresh: bool = False, timeout: float = 60
+) -> Path:
     """Download `url` to the cache dir under `name`, using a conditional
     request when a cached copy already exists. Returns the local path.
     Raises CCAMLRGISOfflineError if the request fails and there's no usable
@@ -98,12 +102,12 @@ def fetch(url, name, path=None, force_refresh=False, timeout=60):
     return dest
 
 
-def info(path=None):
+def info(path: str | Path | None = None) -> dict[str, Any]:
     """Return the cache manifest: name -> {url, etag, last_modified, sha256, bytes}."""
     return _load_manifest(cache_dir(path))
 
 
-def prefetch(layers=None, bathy_res=None, path=None):
+def prefetch(layers: Sequence[str] | None = None, bathy_res: int | None = None, path: str | Path | None = None) -> None:
     """Warm the cache for the given WFS layer names (see load.py) and,
     optionally, a bathymetry resolution, so the library can be used offline
     afterwards.

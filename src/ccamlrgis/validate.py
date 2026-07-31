@@ -12,9 +12,13 @@ supplied, since the projected/densified output geometry in a GeoDataFrame
 doesn't itself carry that information.
 """
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 
+import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
+from shapely.geometry.base import BaseGeometry
 from shapely.validation import explain_validity
 
 from .crs import WGS84
@@ -29,23 +33,23 @@ class Violation:
 
 @dataclass
 class GeospatialRulesReport:
-    violations: list = field(default_factory=list)
+    violations: list[Violation] = field(default_factory=list)
 
     @property
-    def ok(self):
+    def ok(self) -> bool:
         return len(self.violations) == 0
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ok
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.ok:
             return "GeospatialRulesReport(ok=True, 0 violations)"
         lines = "\n".join(f"  [{v.rule}] row {v.index}: {v.message}" for v in self.violations)
         return f"GeospatialRulesReport(ok=False, {len(self.violations)} violations):\n{lines}"
 
 
-def _iter_rings(geom):
+def _iter_rings(geom: BaseGeometry) -> Iterator[npt.NDArray[np.float64]]:
     """Yield an (n, 2) lon/lat coordinate array for every ring/line in `geom`."""
     gt = geom.geom_type
     if gt == "Polygon":
@@ -63,7 +67,7 @@ def _iter_rings(geom):
         yield np.array(geom.coords)
 
 
-def _max_lon_gap(coords):
+def _max_lon_gap(coords: npt.NDArray[np.float64]) -> float:
     """Max angular longitude distance between consecutive vertices,
     antimeridian-aware -- same formula as densify_data.
     """
@@ -74,7 +78,7 @@ def _max_lon_gap(coords):
     return float(diffs.max())
 
 
-def _ring_signed_area(coords):
+def _ring_signed_area(coords: npt.NDArray[np.float64]) -> float:
     """Shoelace signed area of a closed ring (first point == last point).
     Negative = clockwise, positive = counter-clockwise, in the standard
     x-right/y-up plane (lon=x, lat=y).
@@ -90,12 +94,17 @@ def _ring_signed_area(coords):
     return 0.5 * float(np.sum(x[:-1] * y[1:] - x[1:] * y[:-1]))
 
 
-def _count_decimals(value):
+def _count_decimals(value: float) -> int:
     s = f"{value:.10f}".rstrip("0")
     return len(s.split(".")[1]) if "." in s else 0
 
 
-def check_geospatial_rules(gdf, dlon=0.1, check_orientation=True, source_coords=None):
+def check_geospatial_rules(
+    gdf: gpd.GeoDataFrame,
+    dlon: float = 0.1,
+    check_orientation: bool = True,
+    source_coords: npt.ArrayLike | None = None,
+) -> GeospatialRulesReport:
     """Check a GeoDataFrame against CCAMLR's geospatial rules. Returns a
     `GeospatialRulesReport` (truthy iff there are no violations).
 
@@ -105,7 +114,7 @@ def check_geospatial_rules(gdf, dlon=0.1, check_orientation=True, source_coords=
     without it, that specific check is skipped rather than silently
     passed.
     """
-    violations = []
+    violations: list[Violation] = []
 
     if gdf.crs is None or gdf.crs.to_epsg() != 6932:
         violations.append(Violation("crs", f"CRS is {gdf.crs}, expected EPSG:6932"))

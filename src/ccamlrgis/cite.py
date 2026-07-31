@@ -28,7 +28,7 @@ WFS_URL_TEMPLATE = (
 )
 
 
-def layer_citation(layer, year=None, version=None):
+def layer_citation(layer: str, year: int | None = None, version: int | None = None) -> str:
     """The CCAMLR rule-8 citation string for a loaded layer:
     "CCAMLR. (Year). Geographical data layer: (Layer name). Version
     (Version), URL: (URL)".

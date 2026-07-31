@@ -4,7 +4,12 @@ matplotlib (design doc section 1.2) -- import ccamlrgis.plot explicitly
 matplotlib installed at all.
 """
 
+from collections.abc import Sequence
+from typing import cast
+
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from ..crs import CCAMLR_CRS
 from .grid import add_reference_grid
@@ -13,7 +18,13 @@ from .legend import LegendItem, add_legend, add_pie_legend
 from .scale import add_colour_scale
 
 
-def basemap(ax=None, figsize=(8, 8), xlim=None, ylim=None, attribution=None):
+def basemap(
+    ax: Axes | None = None,
+    figsize: tuple[float, float] = (8, 8),
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+    attribution: str | Sequence[str] | None = None,
+) -> tuple[Figure, Axes]:
     """Return a configured `(fig, ax)` in the CCAMLR CRS (EPSG:6932). New
     in this port -- the R package draws onto base graphics' current device
     instead of returning a figure/axes handle. Add layers with
@@ -28,7 +39,7 @@ def basemap(ax=None, figsize=(8, 8), xlim=None, ylim=None, attribution=None):
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     else:
-        fig = ax.figure
+        fig = cast(Figure, ax.figure)
     ax.set_aspect("equal")
     if xlim is not None:
         ax.set_xlim(xlim)

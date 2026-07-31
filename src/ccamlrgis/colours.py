@@ -1,4 +1,8 @@
+from collections.abc import Sequence
+from typing import Any
+
 import numpy as np
+import numpy.typing as npt
 
 # CCAMLRGIS R: data/Depth_cols.RData, Depth_cols2.RData, Depth_cuts.RData,
 # Depth_cuts2.RData -- values confirmed via `rdata` against the R package's
@@ -73,16 +77,17 @@ _NAMED_COLOURS = {
 }
 
 
-def _to_rgb(colour):
+def _to_rgb(colour: str) -> tuple[int, int, int]:
     if isinstance(colour, str) and colour.startswith("#"):
         hexcode = colour.lstrip("#")
         if len(hexcode) == 3:
             hexcode = "".join(c * 2 for c in hexcode)
-        return tuple(int(hexcode[i : i + 2], 16) for i in (0, 2, 4))
+        r, g, b = (int(hexcode[i : i + 2], 16) for i in (0, 2, 4))
+        return r, g, b
     return _to_rgb(_NAMED_COLOURS[colour.lower()])
 
 
-def _ramp_palette(cols, n):
+def _ramp_palette(cols: Sequence[str], n: int) -> list[str]:
     """Linear RGB interpolation across `cols`, `n` output hex colours --
     equivalent to R's grDevices::colorRampPalette(cols)(n).
     """
@@ -101,7 +106,9 @@ def _ramp_palette(cols, n):
     return out
 
 
-def add_colour(var, cuts=100, cols=("green", "yellow", "red")):
+def add_colour(
+    var: npt.ArrayLike, cuts: int | Sequence[float] = 100, cols: Sequence[str] = ("green", "yellow", "red")
+) -> dict[str, Any]:
     """Map a numeric variable to colours, either as a continuous gradient
     (``cuts`` a single int: that many equally-spaced classes) or discrete
     classes (``cuts`` a sequence of breakpoints). CCAMLRGIS R: add_col.R.
@@ -112,8 +119,8 @@ def add_colour(var, cuts=100, cols=("green", "yellow", "red")):
     """
     var = np.asarray(var, dtype=float)
 
-    if np.ndim(cuts) == 0:
-        cuts_to = np.linspace(np.nanmin(var), np.nanmax(var), int(cuts))
+    if isinstance(cuts, int):
+        cuts_to = np.linspace(np.nanmin(var), np.nanmax(var), cuts)
     else:
         cuts_to = np.asarray(cuts, dtype=float)
 

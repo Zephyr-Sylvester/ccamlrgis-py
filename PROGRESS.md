@@ -3,6 +3,45 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (10) — mypy --strict compliance (G5 release gate, done)
+
+The whole package (19 source files under `src/ccamlrgis/`, ~2,600 lines)
+is now fully type-annotated and `mypy --strict` clean -- the last item on
+the standing plan. Went from 229 errors (110 `no-untyped-call` cascading
+from 79 `no-untyped-def`, 30 `import-untyped`, plus ~10 genuine type
+errors) to 0, file by file, verifying with the offline pytest suite after
+each file (stayed green throughout, 95 passed).
+
+What this took:
+- `[tool.mypy]` config in `pyproject.toml`: `strict = true`, plus
+  `ignore_missing_imports` per-module for the geospatial-stack libraries
+  that ship no type stubs (geopandas, pandas, shapely, rasterio,
+  rioxarray, xarray, mpl_toolkits, pyproj) -- deliberately *not*
+  `pandas-stubs` (known to fight geopandas' own dynamic typing); our own
+  code stays checked at full strictness regardless.
+- Every public and private function signature annotated, using modern
+  `X | None` unions (matches `requires-python = ">=3.10"`).
+- A handful of real (non-annotation) fixes surfaced along the way, all
+  small and behavior-preserving: two `tuple(generator)` calls that mypy
+  correctly flagged as not actually fixed-length (`_to_rgb`, `_rgba_ramp`)
+  rebuilt as explicit tuples; a `cast()` at every place matplotlib's or
+  rioxarray's own stubs return a wider union than the code actually
+  produces (`ax.figure` -> `Figure`, `open_rasterio()` -> `DataArray`);
+  a few previously-implicit "this parameter is actually required"
+  contracts (`add_colour_scale`'s `cuts`/`cols`, `add_legend`'s `items`,
+  `add_pie_legend`'s `pies`, `add_labels`' `layer`, `get_iso_polys`'
+  `cuts`, `create_polygrids`' `dlon`/`dlat` in degree-cell mode) made
+  explicit with a `raise ValueError` guard instead of failing on a `None`
+  a few lines deeper -- matching the idiom already used elsewhere in the
+  codebase (`layer_citation`, `seabed_area`).
+- `.github/workflows/ci.yml`'s `typecheck` job: dropped `continue-on-error`
+  -- mypy is now a real, blocking gate like `lint` and `test`.
+
+This was the last open item from the standing plan (README tutorial,
+notebooks, and this). Everything under design doc G5 is now done except
+the CI-only bits that were never separately tracked (bundled data
+publishing, NOTICE/LICENSE) -- those landed in earlier sessions.
+
 ## 2026-07-30 (9) — README.md: full tutorial (port of the R README)
 
 `README.md` is now a full port of the R package's own 2,400-line

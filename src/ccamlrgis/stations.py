@@ -1,15 +1,21 @@
+from collections.abc import Sequence
+from typing import Any
+
 import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import rasterio.features
+import xarray as xr
 from shapely.geometry import shape as shapely_shape
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
 from .analysis import project_data
 from .crs import CCAMLR_CRS
 
 
-def _stratum_polygon(arr, transform, top, bot):
+def _stratum_polygon(arr: npt.NDArray[np.float64], transform: Any, top: float, bot: float) -> BaseGeometry | None:
     """Vectorise the raster cells with top <= value <= bot into a polygon.
     Same raster-cell-boundary (blocky) approach as get_iso_polys -- see
     porting_notes.md deviation 12.
@@ -23,7 +29,17 @@ def _stratum_polygon(arr, transform, top, bot):
     return unary_union(geoms)
 
 
-def create_stations(poly, bathy, depths, n=None, n_auto=None, dist=None, buf=1000, rng=None, seed=None):
+def create_stations(
+    poly: gpd.GeoDataFrame,
+    bathy: xr.DataArray,
+    depths: Sequence[float],
+    n: Sequence[int] | None = None,
+    n_auto: int | None = None,
+    dist: float | None = None,
+    buf: float = 1000,
+    rng: np.random.Generator | None = None,
+    seed: int | None = None,
+) -> gpd.GeoDataFrame:
     """Random (or minimum-spaced) station locations inside a polygon,
     stratified by depth range. CCAMLRGIS R: create_Stations (create.R).
 
@@ -92,9 +108,9 @@ def create_stations(poly, bathy, depths, n=None, n_auto=None, dist=None, buf=100
         kept_rows = []
         first = True
         while len(remaining) > 0:
-            idx = len(remaining) // 2 if first else rng.integers(0, len(remaining))
+            pick = len(remaining) // 2 if first else int(rng.integers(0, len(remaining)))
             first = False
-            row = remaining.iloc[idx]
+            row = remaining.iloc[pick]
             kept_rows.append(row)
             d = np.hypot(remaining["x"].to_numpy() - row["x"], remaining["y"].to_numpy() - row["y"])
             remaining = remaining[d > width].reset_index(drop=True)

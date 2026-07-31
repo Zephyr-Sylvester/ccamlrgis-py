@@ -34,6 +34,18 @@ packages = ["src/ccamlrgis"]
 [tool.pytest.ini_options]
 markers = ["network: tests that require internet access"]
 
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+# None of these ship type stubs (or a py.typed marker) for the submodules
+# this package uses -- geospatial-stack gap, not something to work around
+# by installing e.g. pandas-stubs (known to fight geopandas' own dynamic
+# typing). Our own code is still checked at --strict; this only stops
+# mypy complaining about the libraries themselves being untyped.
+module = ["geopandas.*", "pandas.*", "shapely.*", "rasterio.*", "rioxarray.*", "xarray.*", "mpl_toolkits.*", "pyproj.*"]
+ignore_missing_imports = true
+
 [tool.ruff]
 line-length = 120
 

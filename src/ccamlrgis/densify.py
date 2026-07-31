@@ -1,10 +1,13 @@
 import warnings
 
 import numpy as np
+import numpy.typing as npt
 from shapely.geometry import LineString, Point
 
 
-def densify_data(lon, lat, dlon=0.1, dlat=0.1):
+def densify_data(
+    lon: npt.ArrayLike, lat: npt.ArrayLike, dlon: float = 0.1, dlat: float = 0.1
+) -> npt.NDArray[np.float64]:
     """Insert extra vertices along a polyline so no segment spans more than
     ``dlon``/``dlat`` degrees, and split any antimeridian-crossing segment
     into two. CCAMLRGIS R: DensifyData.R.
@@ -83,7 +86,7 @@ def densify_data(lon, lat, dlon=0.1, dlat=0.1):
         # doubles apparently does; matching precision, not bit-pattern, is
         # what's needed here). 9 decimal degrees is sub-millimeter, far below
         # the 5-decimal precision the geospatial rules require of vertices.
-        def _round(p):
+        def _round(p: tuple[float, float]) -> tuple[float, float]:
             return (round(p[0], 9), round(p[1], 9))
 
         pts = {_round((lon1, lat1)), _round((lon2, lat2))}

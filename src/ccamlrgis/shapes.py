@@ -1,10 +1,13 @@
+from collections.abc import Sequence
 from math import comb
 
 import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import shapely
 from shapely.geometry import LineString, MultiLineString, MultiPoint, Polygon, box
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
 from .analysis import project_data
@@ -12,7 +15,9 @@ from .colours import _to_rgb
 from .crs import CCAMLR_CRS
 
 
-def _get_perpendicular(x, y, d):
+def _get_perpendicular(
+    x: npt.ArrayLike, y: npt.ArrayLike, d: float
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """For each point in (x, y), the two points offset perpendicular to the
     local segment direction (to the previous point; to the next point for
     the first one) at distance d. Returns (2n,) arrays: point i's two
@@ -24,7 +29,7 @@ def _get_perpendicular(x, y, d):
     ox = np.empty(2 * n)
     oy = np.empty(2 * n)
 
-    def _offsets(xi, yi, xj, yj):
+    def _offsets(xi: float, yi: float, xj: float, yj: float) -> tuple[float, float, float, float]:
         # perpendicular to the segment (xj,yj)->(xi,yi), at point (xi,yi)
         with np.errstate(divide="ignore", invalid="ignore"):
             m = (yi - yj) / (xi - xj)
@@ -42,7 +47,7 @@ def _get_perpendicular(x, y, d):
     return ox, oy
 
 
-def _bezier_curve(control_points, n_points):
+def _bezier_curve(control_points: npt.ArrayLike, n_points: int) -> npt.NDArray[np.float64]:
     """Bernstein-basis Bezier curve, matching R's bezier::bezier() default
     algorithm. `control_points` is (m, d); returns (n_points, d).
     """
@@ -56,7 +61,16 @@ def _bezier_curve(control_points, n_points):
     return result
 
 
-def create_ellipse(latc, lonc, lmaj, lmin, ang=0, n_points=100, direction="cw", yx=False):
+def create_ellipse(
+    latc: float,
+    lonc: float,
+    lmaj: float,
+    lmin: float,
+    ang: float = 0,
+    n_points: int = 100,
+    direction: str = "cw",
+    yx: bool = False,
+) -> gpd.GeoDataFrame:
     """Create an ellipse polygon. CCAMLRGIS R: create_Ellipse.R."""
     if not yx:
         cen = project_data(pd.DataFrame({"Lat": [latc], "Lon": [lonc]}), names_in=["Lat", "Lon"])
@@ -78,7 +92,9 @@ def create_ellipse(latc, lonc, lmaj, lmin, ang=0, n_points=100, direction="cw", 
     return gpd.GeoDataFrame(cen, geometry=[poly], crs=CCAMLR_CRS)
 
 
-def create_hashes(pol, angle=45, spacing=1, width=1):
+def create_hashes(
+    pol: gpd.GeoDataFrame | gpd.GeoSeries | BaseGeometry, angle: float = 45, spacing: float = 1, width: float = 1
+) -> gpd.GeoSeries:
     """Hatching lines filling a polygon, as real geometry. CCAMLRGIS R:
     create_Hashes.R. `pol` is a single polygon (a GeoDataFrame/GeoSeries row
     or a shapely geometry).
@@ -128,7 +144,7 @@ def create_hashes(pol, angle=45, spacing=1, width=1):
     return gpd.GeoSeries([clipped], crs=crs)
 
 
-def _rgba_ramp(colours, alphas, n):
+def _rgba_ramp(colours: Sequence[str], alphas: Sequence[float], n: int) -> list[tuple[float, float, float, float]]:
     """Linear RGBA interpolation across `colours`/`alphas`, `n` output
     (r,g,b,a) tuples in [0,1]. CCAMLRGIS R: grDevices::colorRampPalette
     with alpha=TRUE, fed opacities of 1-Atrans.
@@ -136,29 +152,28 @@ def _rgba_ramp(colours, alphas, n):
     stops = [(*(c / 255 for c in _to_rgb(col)), 1 - a) for col, a in zip(colours, alphas)]
     positions = [0.0] if n <= 1 else [i / (n - 1) for i in range(n)]
     seg = len(stops) - 1
-    out = []
+    out: list[tuple[float, float, float, float]] = []
     for p in positions:
         t = p * seg
         i = min(int(t), seg - 1) if seg > 0 else 0
         frac = t - i if seg > 0 else 0.0
-        out.append(
-            tuple(stops[i][k] + (stops[i + 1][k] - stops[i][k]) * frac if seg > 0 else stops[0][k] for k in range(4))
-        )
+        vals = [stops[i][k] + (stops[i + 1][k] - stops[i][k]) * frac if seg > 0 else stops[0][k] for k in range(4)]
+        out.append((vals[0], vals[1], vals[2], vals[3]))
     return out
 
 
 def create_arrow(
-    input,
-    n_points=50,
-    pwidth=5,
-    hlength=15,
-    hwidth=10,
-    dlength=0,
-    arrow_type="normal",
-    colour="green",
-    transparency=0,
-    yx=False,
-):
+    input: pd.DataFrame,
+    n_points: int = 50,
+    pwidth: float = 5,
+    hlength: float = 15,
+    hwidth: float = 10,
+    dlength: float = 0,
+    arrow_type: str = "normal",
+    colour: str | Sequence[str] = "green",
+    transparency: float | Sequence[float] = 0,
+    yx: bool = False,
+) -> gpd.GeoDataFrame:
     """Create a (possibly curved, possibly segmented/dashed) arrow.
     CCAMLRGIS R: create_Arrow.R. `input` has 2 or 3 columns: Lat, Lon (or Y,
     X if `yx=True`), and an optional integer weight (biases the Bezier
@@ -251,27 +266,27 @@ def create_arrow(
 
 
 def create_circular_arrow(
-    latc=-67,
-    lonc=-30,
-    lmaj=800,
-    lmin=500,
-    ang=140,
-    n_points_ellipse=100,
-    direction="cw",
-    n_arrows=1,
-    spacing=0,
-    start=0,
-    n_points_arrow=50,
-    pwidth=5,
-    hlength=15,
-    hwidth=10,
-    dlength=0,
-    arrow_type="normal",
-    colour="green",
-    transparency=0,
-    yx=False,
-    input=None,
-):
+    latc: float = -67,
+    lonc: float = -30,
+    lmaj: float = 800,
+    lmin: float = 500,
+    ang: float = 140,
+    n_points_ellipse: int = 100,
+    direction: str = "cw",
+    n_arrows: int = 1,
+    spacing: int = 0,
+    start: float = 0,
+    n_points_arrow: int = 50,
+    pwidth: float = 5,
+    hlength: float = 15,
+    hwidth: float = 10,
+    dlength: float = 0,
+    arrow_type: str = "normal",
+    colour: str | Sequence[str] = "green",
+    transparency: float | Sequence[float] = 0,
+    yx: bool = False,
+    input: gpd.GeoDataFrame | BaseGeometry | None = None,
+) -> gpd.GeoDataFrame:
     """One or more arrows along an elliptical (or custom, via `input`) path.
     Defaults trace a simplified Weddell Sea gyre. CCAMLRGIS R:
     create_CircularArrow.R.
@@ -296,7 +311,7 @@ def create_circular_arrow(
     if n_arrows > 1:
         elp["a"] = pd.cut(np.arange(1, len(elp) + 1), n_arrows, labels=False) + 1
 
-    def _arrow(pts):
+    def _arrow(pts: pd.DataFrame) -> gpd.GeoDataFrame:
         return create_arrow(
             pts[["Y", "X"]],
             yx=True,

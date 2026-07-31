@@ -47,16 +47,14 @@ jobs:
       - run: ruff format --check src/ tests/ tools/
 
   typecheck:
-    # Non-blocking for now: the codebase predates any type annotations
-    # (mypy --strict currently reports ~200 errors, almost all "missing
-    # annotation" on existing functions -- retroactively annotating ~3000
-    # lines is real, separate work the design doc calls for as part of the
-    # G5 release gate, not something to rush through as a side effect of
-    # standing up CI). Runs and reports so the gap stays visible; doesn't
-    # fail the build. Drop `continue-on-error` once annotation work lands.
-    name: typecheck (mypy, non-blocking)
+    # Blocking: the whole package (19 source files, ~2600 lines) is fully
+    # annotated and mypy --strict clean, per the design doc's G5 release
+    # gate. Third-party geospatial libraries without stubs (geopandas,
+    # pandas, shapely, rasterio, rioxarray, xarray, mpl_toolkits, pyproj)
+    # are exempted per-module in pyproject.toml -- our own code is still
+    # checked at full strictness.
+    name: typecheck (mypy)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

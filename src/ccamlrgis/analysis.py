@@ -1,5 +1,7 @@
 import warnings
+from collections.abc import Sequence
 from itertools import pairwise
+from typing import Any
 
 import geopandas as gpd
 import numpy as np
@@ -13,7 +15,13 @@ _FORWARD = Transformer.from_crs(WGS84, CCAMLR_CRS, always_xy=True)
 _INVERSE = Transformer.from_crs(CCAMLR_CRS, WGS84, always_xy=True)
 
 
-def project_data(input, names_in=None, names_out=None, append=True, inverse=False):
+def project_data(
+    input: pd.DataFrame,
+    names_in: Sequence[str] | None = None,
+    names_out: Sequence[str] | None = None,
+    append: bool = True,
+    inverse: bool = False,
+) -> pd.DataFrame:
     """Project Lat/Lon to the CCAMLR CRS (or back-project Y/X to Lat/Lon).
     CCAMLRGIS R: project_data.r. ``names_in``/``names_out`` follow R's
     convention: [Lat-like name, Lon-like name] (Y/lat first, X/lon second).
@@ -67,7 +75,7 @@ def project_data(input, names_in=None, names_out=None, append=True, inverse=Fals
     return out
 
 
-def clip_to_coast(input, coast=None):
+def clip_to_coast(input: gpd.GeoDataFrame, coast: gpd.GeoDataFrame | gpd.GeoSeries | None = None) -> gpd.GeoDataFrame:
     """Clip polygons to a coastline, removing the land portion, and record
     the resulting area. CCAMLRGIS R: Clip2Coast.R.
 
@@ -92,7 +100,14 @@ def clip_to_coast(input, coast=None):
     return output
 
 
-def assign_areas(input, polys, area_name_format="GAR_Long_Label", buffer=0, names_in=None, names_out=None):
+def assign_areas(
+    input: pd.DataFrame,
+    polys: dict[str, gpd.GeoDataFrame],
+    area_name_format: str | Sequence[str] = "GAR_Long_Label",
+    buffer: float | Sequence[float] = 0,
+    names_in: Sequence[str] | None = None,
+    names_out: Sequence[str] | None = None,
+) -> pd.DataFrame:
     """Assign point locations to whichever polygon(s) they fall in (e.g.
     which ASD/SSRU a fishing location occurred in). CCAMLRGIS R:
     assign_areas.r.
@@ -179,7 +194,9 @@ def assign_areas(input, polys, area_name_format="GAR_Long_Label", buffer=0, name
     return merged
 
 
-def rotate_obj(input, lon0=None):
+def rotate_obj(
+    input: gpd.GeoDataFrame | gpd.GeoSeries | xr.DataArray, lon0: float | None = None
+) -> gpd.GeoDataFrame | gpd.GeoSeries | xr.DataArray:
     """Rotate a vector or raster object by re-defining its projection so
     that ``lon0`` points up. For plotting only, not analysis -- distances
     and areas computed after rotation are not meaningful. CCAMLRGIS R:
@@ -195,7 +212,7 @@ def rotate_obj(input, lon0=None):
     raise TypeError("'input' must be a GeoDataFrame/GeoSeries or an xarray.DataArray raster (with a .rio accessor).")
 
 
-def get_c_intersection(line1, line2):
+def get_c_intersection(line1: Sequence[float], line2: Sequence[float]) -> dict[str, float]:
     """Cartesian (planar, not geodesic) intersection of two lines each
     given as ``[lon_start, lat_start, lon_end, lat_end]``. CCAMLRGIS R:
     get_C_intersection.R (formula:
@@ -220,7 +237,7 @@ def get_c_intersection(line1, line2):
     return {"Lon": px, "Lat": py}
 
 
-def get_depths(input, bathy, names_in=None):
+def get_depths(input: pd.DataFrame, bathy: xr.DataArray, names_in: Sequence[str] | None = None) -> pd.DataFrame:
     """Sample a bathymetry raster's depth at point locations (nearest-cell
     value, no interpolation -- matches terra::extract's default). CCAMLRGIS
     R: get_depths.R.
@@ -243,7 +260,12 @@ def get_depths(input, bathy, names_in=None):
     return out
 
 
-def seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800)):
+def seabed_area(
+    bathy: xr.DataArray,
+    poly: gpd.GeoDataFrame,
+    poly_names: str | None = None,
+    depth_classes: Sequence[float] = (-600, -1800),
+) -> pd.DataFrame:
     """Planimetric seabed area within polygons and depth strata, in km2.
     CCAMLRGIS R: seabed_area.R.
     """
@@ -258,7 +280,7 @@ def seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800)):
     pairs = list(pairwise(depth_classes))
     col_names = [f"{a}|{b}" for a, b in pairs]
 
-    rows = []
+    rows: list[dict[str, Any]] = []
     for _, row in poly.iterrows():
         # all_touched=True matches terra::mask()'s default (any overlap
         # counts, not just cell-centre-in-polygon) -- confirmed against the
@@ -281,7 +303,14 @@ def seabed_area(bathy, poly, poly_names=None, depth_classes=(-600, -1800)):
     return out
 
 
-def get_iso_polys(rast, poly=None, cuts=None, cols=("green", "yellow", "red"), grp=False, strict=True):
+def get_iso_polys(
+    rast: xr.DataArray,
+    poly: gpd.GeoDataFrame | None = None,
+    cuts: Sequence[float] | None = None,
+    cols: Sequence[str] = ("green", "yellow", "red"),
+    grp: bool = False,
+    strict: bool = True,
+) -> gpd.GeoDataFrame:
     """Turn a raster into filled contour-band polygons between `cuts`.
     CCAMLRGIS R: get_iso_polys.R.
 
@@ -296,6 +325,8 @@ def get_iso_polys(rast, poly=None, cuts=None, cols=("green", "yellow", "red"), g
     import rasterio.features
     from shapely.geometry import shape as shapely_shape
 
+    if cuts is None:
+        raise ValueError("'cuts' must be specified")
     if poly is not None:
         geom = poly.geometry.union_all() if hasattr(poly, "geometry") else poly.union_all()
         # Unlike seabed_area's per-stratum masking (all_touched=True matches
@@ -314,7 +345,7 @@ def get_iso_polys(rast, poly=None, cuts=None, cols=("green", "yellow", "red"), g
     band_idx = np.digitize(arr, cuts_full[1:-1], right=False)  # right=False: bins are [lo, hi)
 
     transform = rast.rio.transform()
-    records = []
+    records: list[dict[str, Any]] = []
     for i in range(len(lo)):
         mask = valid & (band_idx == i)
         if not mask.any():

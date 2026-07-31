@@ -5,9 +5,13 @@ Release asset set versioned independently of the code. See
 tools/build_datasets.py for how the assets are produced.
 """
 
+from pathlib import Path
+from typing import cast
+
 import geopandas as gpd
 import pandas as pd
 import rioxarray
+import xarray as xr
 
 from . import cache
 from .crs import CCAMLR_CRS
@@ -19,7 +23,9 @@ _TABULAR = ("PolyData", "GridData", "PointData", "LineData", "PieData", "PieData
 _SPATIAL = ("Coast",)
 
 
-def load_example(name, path=None, force_refresh=False):
+def load_example(
+    name: str, path: str | Path | None = None, force_refresh: bool = False
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """Load one of CCAMLRGIS's bundled example datasets by name:
     "PolyData", "GridData", "PointData", "LineData", "PieData", "PieData2",
     "Labels" (tabular -> `pandas.DataFrame`) or "Coast" (spatial ->
@@ -38,10 +44,11 @@ def load_example(name, path=None, force_refresh=False):
     raise ValueError(f"Unknown example dataset {name!r}; choose from {sorted(_TABULAR + _SPATIAL)}")
 
 
-def small_bathy(path=None, force_refresh=False):
+def small_bathy(path: str | Path | None = None, force_refresh: bool = False) -> xr.DataArray:
     """Low-resolution (10 km) bathymetry, for illustrative purposes only --
     use `load_bathy()` for real analysis. CCAMLRGIS R: SmallBathy().
     """
     url = f"{_RELEASE_BASE}/SmallBathy.tif"
     local_path = cache.fetch(url, name="SmallBathy.tif", path=path, force_refresh=force_refresh)
-    return rioxarray.open_rasterio(local_path).squeeze("band", drop=True)
+    raster = cast(xr.DataArray, rioxarray.open_rasterio(local_path))
+    return raster.squeeze("band", drop=True)

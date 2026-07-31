@@ -6,20 +6,25 @@ as porting_notes.md deviation 2. Manual placement is done by editing a
 label table and passing it via mode='table'.
 """
 
+from collections.abc import Sequence
+
 import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.text import Text
 
 
 def add_labels(
-    ax=None,
-    mode="auto",
-    layer=None,
-    labels_data=None,
-    label_table=None,
-    fontsize=10,
-    fonttype=1,
-    angle=0,
-    colour="black",
-):
+    ax: Axes | None = None,
+    mode: str = "auto",
+    layer: str | Sequence[str] | None = None,
+    labels_data: pd.DataFrame | None = None,
+    label_table: pd.DataFrame | None = None,
+    fontsize: float = 10,
+    fonttype: int = 1,
+    angle: float = 0,
+    colour: str = "black",
+) -> list[Text]:
     """Add text labels to a plot.
 
     mode='auto': label the centres of polygon parts of layers loaded via
@@ -33,14 +38,16 @@ def add_labels(
     manual (click-to-place) label editing.
     """
     ax = ax or plt.gca()
-    artists = []
+    artists: list[Text] = []
 
-    def _style(ft):
+    def _style(ft: int) -> tuple[str, str]:
         weight = "bold" if ft in (2, 4) else "normal"
         style = "italic" if ft in (3, 4) else "normal"
         return weight, style
 
     if mode == "auto":
+        if layer is None:
+            raise ValueError("mode='auto' requires 'layer'")
         if labels_data is None:
             from ..datasets import load_example
 

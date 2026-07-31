@@ -1,5 +1,8 @@
+from collections.abc import Sequence
+
 import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from shapely.geometry import Polygon
 
@@ -9,16 +12,16 @@ from .crs import CCAMLR_CRS
 
 
 def create_pies(
-    input,
-    names_in=None,
-    classes=None,
-    cols=("green", "red"),
-    size=50,
-    size_var=None,
-    grid_km=None,
-    other=0,
-    other_col="grey",
-):
+    input: pd.DataFrame,
+    names_in: Sequence[str] | None = None,
+    classes: Sequence[str] | None = None,
+    cols: Sequence[str] = ("green", "red"),
+    size: float = 50,
+    size_var: str | None = None,
+    grid_km: float | None = None,
+    other: float = 0,
+    other_col: str = "grey",
+) -> gpd.GeoDataFrame:
     """Pie-chart polygons for overlaying on a map: one pie per location,
     slices sized by each class's share of the total. CCAMLRGIS R: Pies.R
     (create_Pies). Returns a GeoDataFrame with a `col` colour column --
@@ -60,7 +63,7 @@ def create_pies(
         gr = grid_km * 1000
         locs = project_data(d, names_in=["Lat", "Lon"], append=True)
 
-        def _snap(vals):
+        def _snap(vals: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
             edges = np.arange(gr * np.floor((vals.min() - gr) / gr), gr * np.ceil((vals.max() + gr) / gr) + gr, gr)
             idx = np.clip(np.digitize(vals, edges, right=False) - 1, 0, len(edges) - 2)
             return edges[idx] + gr / 2

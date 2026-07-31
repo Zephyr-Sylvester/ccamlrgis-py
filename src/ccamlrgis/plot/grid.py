@@ -1,17 +1,22 @@
 """CCAMLRGIS R: add_RefGrid.R."""
 
+from collections.abc import Iterator
+
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.artist import Artist
+from matplotlib.axes import Axes
 from pyproj import Transformer
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 from shapely.geometry import box as shapely_box
+from shapely.geometry.base import BaseGeometry
 
 from ..crs import CCAMLR_CRS, WGS84
 
 _FORWARD = Transformer.from_crs(WGS84, CCAMLR_CRS, always_xy=True)
 
 
-def _iter_lines(geom):
+def _iter_lines(geom: BaseGeometry) -> Iterator[LineString]:
     if geom.is_empty:
         return
     if geom.geom_type == "LineString":
@@ -22,7 +27,7 @@ def _iter_lines(geom):
                 yield g
 
 
-def _first_point(geom):
+def _first_point(geom: BaseGeometry) -> Point | None:
     if geom.is_empty:
         return None
     if geom.geom_type == "Point":
@@ -34,18 +39,18 @@ def _first_point(geom):
 
 
 def add_reference_grid(
-    ax=None,
-    bounds=None,
-    res_lat=1,
-    res_lon=2,
-    lab_lon=None,
-    lat_range=(-80, -45),
-    linewidth=1,
-    line_colour="black",
-    fontsize=10,
-    font_colour="black",
-    offset=None,
-):
+    ax: Axes | None = None,
+    bounds: tuple[float, float, float, float] | None = None,
+    res_lat: float = 1,
+    res_lon: float = 2,
+    lab_lon: float | None = None,
+    lat_range: tuple[float, float] = (-80, -45),
+    linewidth: float = 1,
+    line_colour: str = "black",
+    fontsize: float = 10,
+    font_colour: str = "black",
+    offset: float | None = None,
+) -> list[Artist]:
     """Add a Latitude/Longitude graticule to a map already in the CCAMLR
     CRS. CCAMLRGIS R: add_RefGrid.R.
 
@@ -72,7 +77,7 @@ def add_reference_grid(
     else:
         lons = np.arange(-180, 180 + res_lon / 2, res_lon)
 
-    artists = []
+    artists: list[Artist] = []
 
     for lat in lats:
         lon_line = np.linspace(-180, 180, 720)

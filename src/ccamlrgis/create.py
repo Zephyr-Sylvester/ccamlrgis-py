@@ -1,5 +1,8 @@
+from collections.abc import Sequence
+
 import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from pyproj import Transformer
 from shapely.geometry import LineString, Point, Polygon
@@ -13,7 +16,7 @@ _STATS = ["min", "max", "mean", "sum", "count", "sd", "median"]
 _FORWARD = Transformer.from_crs(WGS84, CCAMLR_CRS, always_xy=True)
 
 
-def _reorder_columns(df, names_in, expected_len):
+def _reorder_columns(df: pd.DataFrame, names_in: Sequence[str] | None, expected_len: int) -> pd.DataFrame:
     if names_in is None:
         return df
     if len(names_in) != expected_len:
@@ -24,7 +27,7 @@ def _reorder_columns(df, names_in, expected_len):
     return df[list(names_in) + rest]
 
 
-def _summarise_numeric(df, id_col):
+def _summarise_numeric(df: pd.DataFrame, id_col: str) -> pd.DataFrame:
     """Per-ID aggregation matching R's summarise_all(min/max/mean/sum/count/
     sd/median): one <col>_<stat> column per numeric input column. R's sd()
     is the sample standard deviation (n-1); pandas .std() matches by
@@ -52,7 +55,7 @@ def _summarise_numeric(df, id_col):
     return out.reset_index()
 
 
-def _add_buffer(gdf, buf, separate_buffers=True):
+def _add_buffer(gdf: gpd.GeoDataFrame, buf: float | Sequence[float], separate_buffers: bool = True) -> gpd.GeoDataFrame:
     """CCAMLRGIS R: add_buffer.R. `buf` is in nautical miles."""
     buf_m = np.asarray(buf, dtype=float) * 1852
     buffered = gdf.copy()
@@ -70,7 +73,9 @@ def _add_buffer(gdf, buf, separate_buffers=True):
     return buffered
 
 
-def _build_polys(input_df, densify=False, dlon=0.1, dlat=0.1):
+def _build_polys(
+    input_df: pd.DataFrame, densify: bool = False, dlon: float = 0.1, dlat: float = 0.1
+) -> gpd.GeoDataFrame:
     """CCAMLRGIS R: cPolys.R. `input_df` columns (after reordering): ID, Lat, Lon, ..."""
     id_col, lat_col, lon_col = input_df.columns[:3]
     ids = input_df[id_col].astype(str).unique()
@@ -107,7 +112,9 @@ def _build_polys(input_df, densify=False, dlon=0.1, dlat=0.1):
     return out
 
 
-def _build_lines(input_df, densify=False, dlon=0.1, dlat=0.1):
+def _build_lines(
+    input_df: pd.DataFrame, densify: bool = False, dlon: float = 0.1, dlat: float = 0.1
+) -> gpd.GeoDataFrame:
     """CCAMLRGIS R: cLines.R."""
     from pyproj import Geod
 
@@ -152,7 +159,7 @@ def _build_lines(input_df, densify=False, dlon=0.1, dlat=0.1):
     return out.to_crs(CCAMLR_CRS)
 
 
-def _build_points(input_df):
+def _build_points(input_df: pd.DataFrame) -> gpd.GeoDataFrame:
     """CCAMLRGIS R: cPoints.R."""
     lat_col, lon_col = input_df.columns[:2]
     out = gpd.GeoDataFrame(
@@ -168,8 +175,16 @@ def _build_points(input_df):
 
 
 def create_polys(
-    input, names_in=None, buffer=0, densify=True, clip=False, separate_buffers=True, dlon=0.1, dlat=0.1, coast=None
-):
+    input: pd.DataFrame,
+    names_in: Sequence[str] | None = None,
+    buffer: float | Sequence[float] = 0,
+    densify: bool = True,
+    clip: bool = False,
+    separate_buffers: bool = True,
+    dlon: float = 0.1,
+    dlat: float = 0.1,
+    coast: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+) -> gpd.GeoDataFrame:
     """Create polygons from a table of (ID, Lat, Lon) vertices. CCAMLRGIS R: create_Polys."""
     df = _reorder_columns(input.copy(), names_in, 3)
     output = _build_polys(df, densify=densify, dlon=dlon, dlat=dlat)
@@ -185,8 +200,16 @@ def create_polys(
 
 
 def create_lines(
-    input, names_in=None, buffer=0, densify=False, clip=False, separate_buffers=True, dlon=0.1, dlat=0.1, coast=None
-):
+    input: pd.DataFrame,
+    names_in: Sequence[str] | None = None,
+    buffer: float | Sequence[float] = 0,
+    densify: bool = False,
+    clip: bool = False,
+    separate_buffers: bool = True,
+    dlon: float = 0.1,
+    dlat: float = 0.1,
+    coast: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+) -> gpd.GeoDataFrame:
     """Create lines from a table of (ID, Lat, Lon) vertices. CCAMLRGIS R: create_Lines."""
     df = _reorder_columns(input.copy(), names_in, 3)
     output = _build_lines(df, densify=densify, dlon=dlon, dlat=dlat)
@@ -201,7 +224,14 @@ def create_lines(
     return output
 
 
-def create_points(input, names_in=None, buffer=0, clip=False, separate_buffers=True, coast=None):
+def create_points(
+    input: pd.DataFrame,
+    names_in: Sequence[str] | None = None,
+    buffer: float | Sequence[float] = 0,
+    clip: bool = False,
+    separate_buffers: bool = True,
+    coast: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+) -> gpd.GeoDataFrame:
     """Create points from a table of (Lat, Lon, ...) locations. CCAMLRGIS R: create_Points."""
     df = _reorder_columns(input.copy(), names_in, 2)
     output = _build_points(df)
@@ -216,7 +246,7 @@ def create_points(input, names_in=None, buffer=0, clip=False, separate_buffers=T
     return output
 
 
-def _seq_inclusive(a, b, step):
+def _seq_inclusive(a: float, b: float, step: float) -> npt.NDArray[np.float64]:
     """R's seq(a, b, by=step): a, a+step, ... up to but never exceeding b
     (exactly at b only if (b-a) is a multiple of step). Unlike a naive
     np.arange(a, b+step/2, step), this never overshoots b -- an overshoot
@@ -225,10 +255,10 @@ def _seq_inclusive(a, b, step):
     before this fix.
     """
     n = int(np.floor((b - a) / step + 1e-9)) + 1
-    return a + np.arange(n) * step
+    return (a + np.arange(n) * step).astype(np.float64)
 
 
-def _degree_grid_polygon(glon, glat, dlon, dlat):
+def _degree_grid_polygon(glon: float, glat: float, dlon: float, dlat: float) -> Polygon:
     xmin, xmax = glon - dlon / 2, glon + dlon / 2
     ymin, ymax = glat - dlat / 2, glat + dlat / 2
     if dlon <= 0.1:
@@ -243,7 +273,9 @@ def _degree_grid_polygon(glon, glat, dlon, dlat):
     return Polygon(np.column_stack([lons, lats]))
 
 
-def _match_points_to_cells(lats, lons, group):
+def _match_points_to_cells(
+    lats: npt.ArrayLike, lons: npt.ArrayLike, group: gpd.GeoDataFrame
+) -> npt.NDArray[np.float64]:
     """Assign each (lat, lon) to the first intersecting cell in `group`
     (row order). CCAMLRGIS R: cGrid.r's point-matching loop.
 
@@ -281,8 +313,15 @@ def _match_points_to_cells(lats, lons, group):
 
 
 def create_polygrids(
-    input, names_in=None, dlon=None, dlat=None, area=None, cuts=100, cols=("green", "yellow", "red"), blank=False
-):
+    input: pd.DataFrame | Sequence[float],
+    names_in: Sequence[str] | None = None,
+    dlon: float | None = None,
+    dlat: float | None = None,
+    area: float | None = None,
+    cuts: int | Sequence[float] = 100,
+    cols: Sequence[str] = ("green", "yellow", "red"),
+    blank: bool = False,
+) -> gpd.GeoDataFrame:
     """Create a polygon grid to spatially aggregate data, in cells of a
     fixed lon/lat size (``dlon``/``dlat``) or of equal area (``area``, km2).
     ``blank=True`` produces an empty grid spanning ``input`` as
@@ -309,16 +348,19 @@ def create_polygrids(
 
     if area is None:
         # degree-cell mode
+        if dlon is None or dlat is None:
+            raise ValueError("'dlon' and 'dlat' must be specified in degree-cell mode")
         if blank:
-            glon, glat = np.meshgrid(_seq_inclusive(lon_min, lon_max, dlon), _seq_inclusive(lat_min, lat_max, dlat))
-            glon, glat = glon.ravel(), glat.ravel()
+            gx, gy = np.meshgrid(_seq_inclusive(lon_min, lon_max, dlon), _seq_inclusive(lat_min, lat_max, dlat))
+            glon, glat = gx.ravel(), gy.ravel()
         else:
+            assert data is not None  # guaranteed by the blank/else branch above
             snapped_lon = np.ceil((data["lon"] + dlon) / dlon) * dlon - dlon - dlon / 2
             snapped_lat = np.ceil((data["lat"] + dlat) / dlat) * dlat - dlat - dlat / 2
             uniq = pd.DataFrame({"Glon": snapped_lon, "Glat": snapped_lat}).drop_duplicates()
             glon, glat = uniq["Glon"].to_numpy(), uniq["Glat"].to_numpy()
 
-        polygons = [_degree_grid_polygon(lo, la, dlon, dlat) for lo, la in zip(glon, glat)]
+        polygons = [_degree_grid_polygon(float(lo), float(la), dlon, dlat) for lo, la in zip(glon, glat)]
         group = gpd.GeoDataFrame(geometry=polygons, crs=WGS84).to_crs(CCAMLR_CRS)
         group["ID"] = np.arange(1, len(group) + 1)
         group["AreaKm2"] = (group.geometry.area / 1_000_000).round(1)
@@ -346,7 +388,9 @@ def create_polygrids(
             buffered_wgs84 = buffered.to_crs(WGS84)
             lat_s = buffered_wgs84.total_bounds[1]  # ymin
 
-            def _strip_polygon_area(lat_n=lat_n, lat_s=lat_s, lon_a=lons_pts[0], lon_b=lons_pts[1]):
+            def _strip_polygon_area(
+                lat_n: float = lat_n, lat_s: float = lat_s, lon_a: float = lons_pts[0], lon_b: float = lons_pts[1]
+            ) -> Polygon:
                 lons = np.unique(np.concatenate([[lon_a], _seq_inclusive(lon_a, lon_b, 0.1), [lon_b]]))
                 p_lon = np.concatenate([lons, lons[::-1], [lons[0]]])
                 p_lat = np.concatenate([np.full(len(lons), lat_n), np.full(len(lons), lat_s), [lat_n]])
@@ -411,6 +455,7 @@ def create_polygrids(
 
     if blank:
         return group[["ID", "AreaKm2", "Centrex", "Centrey", "Centrelon", "Centrelat", "geometry"]]
+    assert data is not None  # guaranteed by the blank/else branch above
 
     # _match_points_to_cells returns *positions* (0-based, into `group` as
     # it stands right now) via the spatial index, not group["ID"] values --

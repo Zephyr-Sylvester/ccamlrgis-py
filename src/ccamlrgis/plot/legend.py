@@ -7,11 +7,15 @@ custom handles -- same visual result (a positioned box of labelled
 shapes), far less surface area. See porting_notes.md.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
+import geopandas as gpd
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.legend import Legend
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 _SHAPES = ("rectangle", "circle", "ellipse", "line", "arrow", "none")
@@ -27,7 +31,7 @@ class LegendItem:
     hatch: str | None = None
 
 
-def _handle_for(item):
+def _handle_for(item: LegendItem) -> mpatches.Patch | mlines.Line2D:
     if item.shape not in _SHAPES:
         raise ValueError(f"'shape' must be one of {_SHAPES}, got {item.shape!r}")
     if item.shape == "rectangle":
@@ -60,10 +64,20 @@ def _handle_for(item):
     return mpatches.Rectangle((0, 0), 1, 1, alpha=0)  # "none": blank space for the text only
 
 
-def add_legend(ax=None, items=None, title=None, subtitle=None, loc="lower right", fontsize=10, title_fontsize=None):
+def add_legend(
+    ax: Axes | None = None,
+    items: Sequence[LegendItem] | None = None,
+    title: str | None = None,
+    subtitle: str | None = None,
+    loc: str = "lower right",
+    fontsize: float = 10,
+    title_fontsize: float | None = None,
+) -> Legend:
     """Add a legend of custom shapes to `ax`. `items` is a list of
     `LegendItem`. Returns the `Legend` artist.
     """
+    if items is None:
+        raise ValueError("'items' must be specified")
     ax = ax or plt.gca()
     handles = [_handle_for(item) for item in items]
     labels = [item.text for item in items]
@@ -72,7 +86,10 @@ def add_legend(ax=None, items=None, title=None, subtitle=None, loc="lower right"
     if subtitle:
         legend_title = f"{title}\n{subtitle}" if title else subtitle
 
-    return ax.legend(
+    # matplotlib's stub narrows loc= to a Literal of its named positions;
+    # ours stays a plain str since matplotlib itself also accepts numeric
+    # location codes at runtime.
+    return ax.legend(  # type: ignore[call-overload,no-any-return]
         handles,
         labels,
         loc=loc,
@@ -83,18 +100,28 @@ def add_legend(ax=None, items=None, title=None, subtitle=None, loc="lower right"
     )
 
 
-def add_pie_legend(ax=None, pies=None, loc="lower left", width="30%", height="30%", title="Pie chart", fontsize=10):
+def add_pie_legend(
+    ax: Axes | None = None,
+    pies: gpd.GeoDataFrame | None = None,
+    loc: str = "lower left",
+    width: str = "30%",
+    height: str = "30%",
+    title: str = "Pie chart",
+    fontsize: float = 10,
+) -> Axes:
     """Add a small pie-chart legend showing the classes/colours used by
     `create_pies()`'s output. CCAMLRGIS R: add_PieLegend (Pies.R).
     Deviation: uses matplotlib's native `Axes.pie()` rather than manually
     building slice geometry, since this is purely cosmetic.
     """
+    if pies is None:
+        raise ValueError("'pies' must be specified")
     ax = ax or plt.gca()
     pdata = pies.drop(columns="geometry") if hasattr(pies, "drop") else pies
     classes = pdata.loc[pdata["LegT"] == "Classes", "Leg"].iloc[0].split(";")
     cols = pdata.loc[pdata["LegT"] == "cols", "Leg"].iloc[0].split(";")
 
-    pax = inset_axes(ax, width=width, height=height, loc=loc)
+    pax: Axes = inset_axes(ax, width=width, height=height, loc=loc)
     pax.pie([1] * len(classes), colors=cols, labels=classes, textprops={"fontsize": fontsize})
     pax.set_title(title, fontsize=fontsize * 1.15)
     return pax
