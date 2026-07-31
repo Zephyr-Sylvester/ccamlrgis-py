@@ -65,3 +65,25 @@ jobs:
           cache: pip
       - run: python -m pip install -e ".[dev,plot,progress]"
       - run: mypy --strict src/ccamlrgis
+
+  notebooks:
+    # Non-blocking: every notebook under notebooks/ recreates a README
+    # figure and, like the network-marked pytest tests, hits the live
+    # CCAMLR WFS and/or this project's own GitHub Release -- external
+    # services this repo doesn't control the uptime of, so a transient
+    # failure here shouldn't block merges. --nbval-lax executes every
+    # cell and fails on raised exceptions, but (unlike plain --nbval)
+    # doesn't diff cell outputs, since the embedded plots are non-
+    # deterministic (live data, RNG-seeded station picks, colour ramps).
+    name: notebooks (nbval, non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -e ".[dev,plot,progress,notebooks]"
+      - run: pytest --nbval-lax notebooks/ -v

@@ -26,6 +26,7 @@ dependencies = [
 plot = ["matplotlib"]
 progress = ["tqdm"]
 dev = ["pytest", "pytest-cov", "mypy", "ruff"]
+notebooks = ["jupyter", "nbval"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ccamlrgis"]

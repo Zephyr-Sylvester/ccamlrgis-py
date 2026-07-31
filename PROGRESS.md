@@ -3,6 +3,54 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-07-30 (8) — Recreate the R package's README figures as notebooks
+
+At the user's request, after the Building-Polygons test landed: six
+Jupyter notebooks under `notebooks/`, each executed end-to-end (`jupyter
+nbconvert --execute`, zero error outputs) before committing, recreating
+every static figure in the R package's `README.Rmd` with `ccamlrgis` +
+`ccamlrgis.plot`:
+
+- `01_basemaps.ipynb` -- §1 (bathymetry, ASD/EEZ overview, local map)
+- `02_create_functions.ipynb` -- §2.1 (points/lines/polys/grids)
+- `03_stations_pies_arrows.ipynb` -- §2.2-2.7 (stations, pies, arrows,
+  hashes, ellipses, circular arrows) -- 24 code cells
+- `04_load_functions.ipynb` -- §3
+- `05_other_functions.ipynb` -- §4
+- `06_colours_legends_labels.ipynb` -- §5, including a from-scratch
+  `add_legend` example and geopandas/matplotlib as the Python equivalent
+  of R's `sf`/`ggplot2` plotting methods
+
+Two R examples are GIF animations (Weddell Sea gyre, `Rotate_obj`
+rotation) rather than static figures; noted inline and skipped as
+out-of-scope for a notebook cell (one static frame substituted for
+`Rotate_obj`). Scope was explicitly narrowed to the README's own ~50
+figures (not the additional ~18 near-duplicate regional `Basemaps/` maps
+or the standalone `Advanced_Grids/` script), confirmed with the user via
+AskUserQuestion up front.
+
+Found and fixed one real gap along the way: the original local-map cell in
+`01_basemaps.ipynb` clipped the *live* `load_coastline()` WFS layer by
+bounding box to approximate "coastline for Subarea 48.6" -- switched to
+the bundled `Coast` dataset's own `ID` column
+(`Coast[Coast$ID=='48.6',]`), which matches the R tutorial exactly and is
+simpler; confirmed the bundled `Coast.gpkg` carries the same dotted
+per-ASD `ID` values R uses (`'48.6'`, `'88.1'`, ...).
+
+Added `notebooks` as a new optional-dependency group (`jupyter`, `nbval`)
+and a `notebooks` CI job (`pytest --nbval-lax`). Non-blocking
+(`continue-on-error: true`), same rationale as the `network`-marked pytest
+tests: every notebook hits the live CCAMLR WFS and/or this project's own
+GitHub Release, external services this repo doesn't control the uptime
+of. `--nbval-lax` checks that every cell executes without raising, not
+that outputs match byte-for-byte (the embedded plots are non-deterministic
+-- live data, RNG-seeded station picks).
+
+### Next
+
+1. `README.md` full tutorial.
+2. `mypy --strict` compliance (last, one consolidated pass).
+
 ## 2026-07-30 (7) — Building-Polygons end-to-end test
 
 `tests/test_building_polygons.py`: builds the three §6 tutorial polygons
