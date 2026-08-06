@@ -15,6 +15,7 @@ from ..crs import CCAMLR_CRS
 from .grid import add_reference_grid
 from .labels import add_labels
 from .legend import LegendItem, add_legend, add_pie_legend
+from .round import add_border_ring, round_basemap, trim_circle
 from .scale import add_colour_scale
 
 
@@ -68,10 +69,13 @@ def basemap(
 
 __all__ = [
     "LegendItem",
+    "add_border_ring",
     "add_colour_scale",
     "add_labels",
     "add_legend",
     "add_pie_legend",
     "add_reference_grid",
     "basemap",
+    "round_basemap",
+    "trim_circle",
 ]

@@ -12,7 +12,8 @@ design decisions in §1-§2 of the port design and logged pre-emptively per
 §7.4; deviations 7-13 were found during implementation; 14-17 are the
 plotting layer's simplifications, explicitly permitted by the design doc's
 own "cosmetic output need not be pixel-identical" bar; 18 is
-`create_stations`'s reduced-cost validation approach (user-requested).
+`create_stations`'s reduced-cost validation approach (user-requested); 19
+is a new addition (not a port) inspired by a different R package, SOmap.
 
 ## 1. Plotting: stateful base graphics → explicit Axes
 
@@ -534,3 +535,50 @@ statistically matches R's -- though R's own placement isn't reproducible
 run-to-run either, so this was never a precise-match target. If exact
 distributional parity becomes important later, the original 1,000-seed
 KS-test design is documented above as the fallback.
+
+## 19. New addition, not a CCAMLRGIS port: `round_basemap`/`trim_circle`/`add_border_ring`
+
+This one isn't a deviation from R CCAMLRGIS -- CCAMLRGIS never had a
+round-map mode, so there's nothing to diverge from. Logged here anyway
+since it's part of the plotting layer and the reasoning is the same kind
+of thing this file otherwise tracks.
+
+**What it is:** `ccamlrgis.plot.round_basemap()`, `trim_circle()`, and
+`add_border_ring()` recreate the round-map / checkerboard-degree-ring
+aesthetic of a different Southern Ocean R package,
+[SOmap](https://github.com/AustralianAntarcticDivision/SOmap) (`SOmap()`'s
+circular frame and `border=TRUE` ring) -- no SOmap code was ported, just
+the visual idea, implemented from scratch against this package's own
+CRS handling.
+
+**Why it was easy:** SOmap builds its round clip and checkerboard border
+by tiling many small polygons with the `graticule` R package (one tile
+per degree-band × longitude-slice, `graticule(..., tiles = TRUE)`,
+alternately coloured). That's not needed here: EPSG:6932 is a true
+polar-azimuthal projection centred exactly on the pole, so (a) latitude
+circles are already circles centred at the projected origin -- `trim_circle()`
+is just `Point(0, 0).buffer(radius_at_lat(trim))` -- and (b) the angle
+around that origin *is* longitude, confirmed empirically
+(`lon=0 -> theta=90deg`, `lon=90 -> theta=0deg`, i.e. `theta = 90 - lon`).
+So the checkerboard ring is just `n_segments` evenly spaced
+`matplotlib.patches.Wedge` patches with alternating facecolors -- no
+graticule-tiling library, and no dependency on `graticule`/`spex` (R
+packages this port has no equivalent of).
+
+**Design choice:** kept composable, matching every other `add_*` helper
+in this module (`round_basemap()` only sets up the Axes; callers clip
+their own bathy/coastline/etc. to `trim_circle(trim)` before plotting
+them, same as `basemap()` never auto-loads or auto-clips layers either).
+This is a deliberate departure from SOmap's own `SOmap()`, which is a
+single monolithic function that loads and plots bathymetry/coastline/ice
+internally with many boolean flags -- consistent with keeping this
+port's "just draw, compose yourself" architecture (deviation 1) rather
+than adopting SOmap's all-in-one style.
+
+**Impact on users:** anyone wanting the classic rectangular CCAMLRGIS-R
+look keeps using `basemap()`; `round_basemap()` is an additional, opt-in
+style, not a replacement. Bathymetry still uses this port's discrete
+depth-cut palette (`DEPTH_COLS`/`DEPTH_CUTS`) rather than SOmap's smooth
+continuously-warped GEBCO colouring -- porting that would mean adding a
+live-raster-warp-to-arbitrary-projection dependency this package doesn't
+otherwise need, out of scope for this addition.

@@ -3,6 +3,32 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-08-03 — Add `round_basemap`/`trim_circle`/`add_border_ring`: SOmap-style round maps
+
+New, not a port: `ccamlrgis.plot` gains a round-map style inspired by a
+different Southern Ocean R package, [SOmap](https://github.com/AustralianAntarcticDivision/SOmap)
+(circular clipped frame + checkerboard degree-ring border), explored
+after the user asked to look at SOmap as a possible second porting
+target. No SOmap code was ported -- EPSG:6932 being a true
+polar-azimuthal projection makes both effects simple from first
+principles: `trim_circle(trim)` is a shapely circle centred on the
+projected pole, and the checkerboard ring is `n_segments` alternating
+`matplotlib.patches.Wedge` patches (angle around the pole *is*
+longitude in this CRS, confirmed empirically). See `docs/porting_notes.md`
+deviation 19 for the full writeup, including why this needed none of
+SOmap's `graticule`-tiling machinery.
+
+Kept composable with the rest of the plotting layer: `round_basemap()`
+only sets up the Axes (matching `basemap()`'s "just draw, compose
+yourself" design, deviation 1) -- callers clip their own bathy/coastline
+to `trim_circle(trim)` before plotting. Bathymetry still uses this
+port's existing discrete depth-cut palette; SOmap's smooth
+continuously-warped-GEBCO look was out of scope for this addition.
+
+5 new tests (`test_trim_circle_*`, `test_round_basemap_*`,
+`test_add_border_ring_*`) in `tests/test_plot.py`; full suite green (100
+offline tests), `mypy --strict` clean, `ruff` clean.
+
 ## 2026-07-31 (3) — Fix `add_labels` leaking off-screen labels on zoomed maps
 
 Found using the package for real, outside this repo: a new sibling

@@ -137,6 +137,35 @@ plt.show()
 
 ![](readme_figs/01_basemaps_03.png)
 
+### Round maps (SOmap-style)
+
+A different round-map style, new in this port (not part of R
+CCAMLRGIS): a circular clipped frame with a checkerboard degree-ring
+border, inspired by the (separate) R package
+[SOmap](https://github.com/AustralianAntarcticDivision/SOmap). No SOmap
+code was ported -- see `docs/porting_notes.md` deviation 19 for why
+EPSG:6932 makes both effects simple from first principles.
+`round_basemap()` only sets up the Axes, matching `basemap()`'s "just
+draw, compose yourself" design -- clip your own layers to
+`trim_circle(trim)` before plotting them.
+
+```python
+circle = cgplot.trim_circle(trim=-45)
+bathy_round = bathy_small.rio.clip([circle], drop=True, all_touched=True)
+coast_round = coast[coast["surface"] == "Land"].clip(circle)
+
+fig, ax = cgplot.round_basemap(figsize=(8, 8), trim=-45)
+bathy_round.plot(ax=ax, cmap=depth_cmap, norm=depth_norm, add_colorbar=False)
+ax.set_xlabel("")
+ax.set_ylabel("")
+ax.set_title("")
+coast_round.plot(ax=ax, color="dimgrey", linewidth=0)
+cgplot.add_border_ring(ax, trim=-45)
+plt.show()
+```
+
+![](readme_figs/01_basemaps_04.png)
+
 Full runnable version: `notebooks/01_basemaps.ipynb`.
 
 ## 2. Create functions

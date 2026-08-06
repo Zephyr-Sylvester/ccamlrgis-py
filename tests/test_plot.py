@@ -102,6 +102,46 @@ def test_add_labels_manual_mode_not_supported(ax):
         ccplot.add_labels(ax, mode="manual")
 
 
+def test_trim_circle_is_centred_on_pole():
+    poly = ccplot.trim_circle(trim=-45)
+    cx, cy = poly.centroid.x, poly.centroid.y
+    assert abs(cx) < 1 and abs(cy) < 1
+    assert poly.area > 0
+
+
+def test_trim_circle_shrinks_closer_to_pole():
+    far = ccplot.trim_circle(trim=-45)
+    near = ccplot.trim_circle(trim=-75)
+    assert near.area < far.area
+
+
+def test_round_basemap_returns_configured_axes():
+    fig, ax = ccplot.round_basemap(trim=-45)
+    assert ax.get_aspect() in (1.0, "equal")
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    assert xmin == pytest.approx(-xmax)
+    assert ymin == pytest.approx(-ymax)
+    assert ax.get_xticks().size == 0
+    plt.close(fig)
+
+
+def test_round_basemap_margin_exceeds_trim_radius():
+    fig, ax = ccplot.round_basemap(trim=-45, border_width=2.0)
+    _, xmax = ax.get_xlim()
+    r_trim = ccplot.trim_circle(trim=-45).bounds[2]
+    assert xmax > r_trim
+    plt.close(fig)
+
+
+def test_add_border_ring_alternates_colours(ax):
+    wedges = ccplot.add_border_ring(ax, trim=-45, n_segments=8)
+    assert len(wedges) == 8
+    facecolors = [w.get_facecolor() for w in wedges]
+    assert facecolors[0] != facecolors[1]
+    assert facecolors[0] == facecolors[2]
+
+
 @pytest.mark.network
 def test_add_labels_auto_mode_default_data(ax, monkeypatch, tmp_path):
     """labels_data=None should default to the cache-backed bundled Labels dataset."""
