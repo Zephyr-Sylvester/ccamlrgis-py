@@ -3,6 +3,19 @@
 Tracks what's been done against `PYTHON_PORT_PROMPT.md` and what's next.
 Newest entries at the top.
 
+## 2026-08-06 — Move the round-map demo out of this repo's tutorial
+
+`round_basemap`/`trim_circle`/`add_border_ring` (2026-08-03, below) stay
+in `ccamlrgis.plot` unchanged, but the worked example demonstrating them
+has moved: removed the "Round maps (SOmap-style)" section from
+`README.md` and the two cells it added to
+`notebooks/01_basemaps.ipynb` (and `readme_figs/01_basemaps_04.png`),
+at the user's request -- this repo's own tutorial should stay focused on
+recreating the R CCAMLRGIS README's examples, not showcasing every
+optional style choice; a worked demo belongs in `../southern-ocean-maps`
+(the sibling repo built specifically to show off real uses of this
+package) instead.
+
 ## 2026-08-03 — Add `round_basemap`/`trim_circle`/`add_border_ring`: SOmap-style round maps
 
 New, not a port: `ccamlrgis.plot` gains a round-map style inspired by a
